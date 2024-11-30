@@ -3,6 +3,8 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
+const loginUrl = import.meta.env.VITE_USER_API;
+
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,20 +24,22 @@ const Login = () => {
         setError(""); // Clear any previous errors
 
         try {
-            // Prepare the form data
-            const formData = new FormData();
-            formData.append("email", email);
-            formData.append("password", password);
-
             // Send data to the backend using Axios
-            //const response = await axios.post('https://your-backend-url.com/api/login', formData, {
-            //    headers: {
-            //        'Content-Type': 'multipart/form-data',  // Send data as form data
-            //    },
-            //});
-            //
-            //console.log(response.data);
-            // You can also redirect to another page or save user data in localStorage
+            const response = await axios.post(
+                `${loginUrl}/login`,
+                {email,password},
+                {
+                    headers: {
+                        "Content-Type": "application/json", // Send data as JSON
+                    },
+                    withCredentials: true, // Ensure credentials are included
+                }
+            );
+
+            console.log(response.data);
+            // Handle successful login
+            // Example: Save token to localStorage or redirect
+            // localStorage.setItem('token', response.data.token);
         } catch (err) {
             // Handle error (invalid credentials, server errors, etc.)
             console.error("Login failed", err);
