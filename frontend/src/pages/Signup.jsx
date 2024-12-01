@@ -1,14 +1,8 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Correct import
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUser,
-  faEnvelope,
-  faLock,
-  faEye,
-  faEyeSlash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faUser, faEnvelope, faLock, faEye, faEyeSlash, faCamera } from "@fortawesome/free-solid-svg-icons";
 
 const signupUrl = import.meta.env.VITE_USER_API;
 
@@ -22,9 +16,8 @@ const SignUp = () => {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -33,15 +26,13 @@ const SignUp = () => {
     setConfirmPasswordVisible(!confirmPasswordVisible);
   };
 
-  // Handle file input for photo upload
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(URL.createObjectURL(file)); // Image preview
+      setProfileImage(URL.createObjectURL(file));
     }
   };
 
-  // Handle form submission and send data to the backend
   const signUpUser = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -59,26 +50,20 @@ const SignUp = () => {
       formData.append("email", email);
       formData.append("password", password);
 
-      // Handle profile image upload
       if (profileImage) {
         const response = await fetch(profileImage);
-        const blob = await response.blob(); // Convert the image URL to a Blob
-
-        // Create a filename using the name state
-        const formattedName = name.replace(/\s+/g, "_"); // Replace spaces with underscores
-        const filename = `${formattedName}.png`; // You can change the extension based on the file type
-
-        formData.append("profileImage", blob, filename); // Append the Blob to formData with the dynamic filename
+        const blob = await response.blob();
+        const formattedName = name.replace(/\s+/g, "_");
+        const filename = `${formattedName}.png`;
+        formData.append("profileImage", blob, filename);
       }
 
       const response = await axios.post(`${signupUrl}/signup`, formData, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        }, // Include credentials in the request
-    });
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       console.log(response.data);
-      navigate("/login")
+      navigate("/login");
     } catch (error) {
       console.log("Signup failed", error);
       setError("Signup failed. Please try again.");
@@ -88,159 +73,162 @@ const SignUp = () => {
   };
 
   return (
-    <div className="bg-black text-white flex min-h-screen flex-col items-center pt-16 sm:justify-center sm:pt-0">
-      <a href="#">
-        <div className="text-foreground font-semibold text-2xl tracking-tighter mx-auto flex items-center gap-2">
-          <div>
-            <img
-              src="/chat.png"
-              alt="CHATWAVE Logo"
-              className="w-12 h-12 rounded-full"
+    <div className="bg-white text-gray-900 min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="flex items-center justify-center mb-8">
+          <img 
+            src="/chat.png" 
+            alt="CHATWAVE Logo" 
+            className="w-16 h-16 mr-4 rounded-full" 
+          />
+          <h1 className="text-3xl font-bold text-blue-600">CHATWAVE</h1>
+        </div>
+
+        <div className="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+          <h2 className="text-2xl font-semibold mb-2 text-center">
+            Create Your Account
+          </h2>
+          <p className="text-gray-500 text-center mb-6">
+            Join the community now!
+          </p>
+
+          <div className="relative mt-6 w-28 h-28 mb-4">
+            <label htmlFor="profileImage" className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-full cursor-pointer">
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt="Profile Preview"
+                  className="rounded-full w-full h-full object-cover"
+                />
+              ) : (
+                <FontAwesomeIcon icon={faCamera} className="text-gray-400 text-3xl" />
+              )}
+            </label>
+            <input
+              type="file"
+              id="profileImage"
+              className="hidden"
+              accept="image/*"
+              onChange={handlePhotoChange}
             />
           </div>
-          <div className="text-2xl">CHATWAVE</div>
-        </div>
-      </a>
 
-      <div className="relative mt-12 w-full max-w-lg sm:mt-10">
-        <div className="relative -mb-px h-px w-full bg-gradient-to-r from-transparent via-sky-300 to-transparent"></div>
-        <div className="mx-5 border dark:border-b-white/50 dark:border-t-white/50 border-b-white/20 sm:border-t-white/20 shadow-[20px_0_20px_20px] shadow-slate-500/10 dark:shadow-white/20 rounded-lg border-white/20 border-l-white/20 border-r-white/20 sm:shadow-sm lg:rounded-xl lg:shadow-none">
-          <div className="flex flex-col p-6">
-            <h3 className="text-xl font-semibold leading-6 tracking-tighter">
-              Sign Up
-            </h3>
-            <p className="mt-1.5 text-sm font-medium text-white/50">
-              Create your account to get started.
-            </p>
-          </div>
-
-          {/* Image Preview Section */}
-          <div className="flex justify-center mt-4">
-            <label htmlFor="photo" className="cursor-pointer">
-              <div className="relative w-32 h-32 rounded-full border-2 border-sky-300 overflow-hidden">
-                {profileImage ? (
-                  <img
-                    src={profileImage}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full text-sky-300">
-                    <FontAwesomeIcon icon={faUser} size="2x" />
-                  </div>
-                )}
-              </div>
+          <form className="space-y-4" onSubmit={signUpUser }>
+            <div>
+              <label 
+                htmlFor="name" 
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Full Name
+              </label>
               <input
-                type="file"
-                id="photo"
-                name="photo"
-                className="hidden"
-                accept="image/*"
-                onChange={handlePhotoChange}
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your full name"
               />
-            </label>
-          </div>
+            </div>
 
-          <div className="p-6 pt-0">
-            <form onSubmit={signUpUser}>
-              {/* Name */}
-              <div className="mt-4">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Full Name
-                </label>
-                <div className="flex items-center rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
-                  <FontAwesomeIcon icon={faUser} className="text-sky-300" />
-                  <input
-                    type="text"
-                    name="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Full Name"
-                    className="block w-full border-0 bg-transparent pl-3 text-sm file:my-1 placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 sm:leading-7 text-foreground"
-                  />
-                </div>
-              </div>
+            <div>
+              <label 
+                htmlFor="email" 
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your email"
+              />
+            </div>
 
-              {/* Email */}
-              <div className="mt-4">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Email
-                </label>
-                <div className="flex items-center rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-sky-300" />
-                  <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="block w-full border-0 bg-transparent pl-2 text-sm file:my-1 placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 sm:leading-7 text-foreground"
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div className="mt-4">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Password
-                </label>
-                <div className="flex items-center rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
-                  <input
-                    type={passwordVisible ? "text" : "password"}
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="block w-full border-0 bg-transparent p-0 text-sm file:my-1 placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 focus:ring-teal-500 sm:leading-7 text-foreground"
-                  />
-                  <button type="button" onClick={togglePasswordVisibility}>
-                    <FontAwesomeIcon
-                      icon={passwordVisible ? faEyeSlash : faEye}
-                      className="w-6 h-6 text-gray-400"
-                    />
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div className="mt-4">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Confirm Password
-                </label>
-                <div className="flex items-center rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
-                  <input
-                    type={confirmPasswordVisible ? "text" : "password"}
-                    name="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm Password"
-                    className="block w-full border-0 bg-transparent p-0 text-sm file:my-1 placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 focus:ring-teal-500 sm:leading-7 text-foreground"
-                  />
-                  <button
-                    type="button"
-                    onClick={toggleConfirmPasswordVisibility}
-                  >
-                    <FontAwesomeIcon
-                      icon={confirmPasswordVisible ? faEyeSlash : faEye}
-                      className="w-6 h-6 text-gray-400"
-                    />
-                  </button>
-                </div>
-              </div>
-
-              {error && <p className="mt-4 text-red-500">{error}</p>}
-
-              <div className="mt-4 flex items-center justify-end gap-x-2">
+            <div>
+              <label 
+                htmlFor="password" 
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={passwordVisible ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your password"
+                />
                 <button
-                  className="font-semibold bg-blue-500 hover:bg-blue-700 text-white text-sm rounded-md px-4 py-2"
-                  type="submit"
-                  disabled={loading}
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
-                  {loading ? "Signing Up..." : "Sign Up"}
+                  <FontAwesomeIcon 
+                    icon={passwordVisible ? faEyeSlash : faEye} 
+                  />
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+
+            <div>
+              <label 
+                htmlFor="confirmPassword" 
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={confirmPasswordVisible ? "text" : "password"}
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+ >
+                  <FontAwesomeIcon 
+                    icon={confirmPasswordVisible ? faEyeSlash : faEye} 
+                  />
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              {loading ? "Signing Up..." : "Sign Up"}
+            </button>
+          </form>
+          <p className="text-center mt-4 text-sm text-gray-600">
+            Already have an account?{" "}
+            <a 
+              href="/login" 
+              className="text-blue-600 hover:underline"
+            >
+              Login
+            </a>
+          </p>
         </div>
       </div>
     </div>

@@ -1,185 +1,145 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { setUser } from "../redux/authUserSlice";
 
 const loginUrl = import.meta.env.VITE_USER_API;
 
 const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [passwordVisible, setPasswordVisible] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    // Toggle Password visibility
-    const togglePasswordVisibility = () => {
-        setPasswordVisible(!passwordVisible);
-    };
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
 
-    // Handle form submission and send data to the backend
-    const loginUser = async (e) => {
-        e.preventDefault(); // Prevent default form submission behavior
-        setLoading(true); // Show loading state
-        setError(""); // Clear any previous errors
+  const loginUser = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-        try {
-            // Send data to the backend using Axios
-            const response = await axios.post(
-                `${loginUrl}/login`,
-                {email,password},
-                {
-                    headers: {
-                        "Content-Type": "application/json", // Send data as JSON
-                    },
-                    withCredentials: true, // Ensure credentials are included
-                }
-            );
-
-            console.log(response.data);
-            // Handle successful login
-            // Example: Save token to localStorage or redirect
-            // localStorage.setItem('token', response.data.token);
-        } catch (err) {
-            // Handle error (invalid credentials, server errors, etc.)
-            console.error("Login failed", err);
-            setError("Invalid email or password. Please try again.");
-        } finally {
-            setLoading(false); // Hide loading state after completion
+    try {
+      const response = await axios.post(
+        `${loginUrl}/login`,
+        { email, password },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
         }
-    };
+      );
 
-    return (
-        <div className="bg-black text-white flex min-h-screen flex-col items-center pt-16 sm:justify-center sm:pt-0">
-            <a href="#">
-                <div className="text-foreground font-semibold text-2xl tracking-tighter mx-auto flex items-center gap-2">
-                    <div>
-                        <img
-                            src="/chat.png"
-                            alt="CHATWAVE Logo"
-                            className="w-10 h-10"
-                        />
-                    </div>
-                    <div className="text-2xl">CHATWAVE</div>
-                </div>
-            </a>
+      dispatch(setUser(response.data.user));
+      navigate("/");
+    } catch (err) {
+      console.error("Login failed", err);
+      setError("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            <div className="relative mt-12 w-full max-w-lg sm:mt-10">
-                <div className="relative -mb-px h-px w-full bg-gradient-to-r from-transparent via-sky-300 to-transparent"></div>
-                <div className="mx-5 border dark:border-b-white/50 dark:border-t-white/50 border-b-white/20 sm:border-t-white/20 shadow-[20px_0_20px_20px] shadow-slate-500/10 dark:shadow-white/20 rounded-lg border-white/20 border-l-white/20 border-r-white/20 sm:shadow-sm lg:rounded-xl lg:shadow-none">
-                    <div className="flex flex-col p-6">
-                        <h3 className="text-xl font-semibold leading-6 tracking-tighter">
-                            Login
-                        </h3>
-                        <p className="mt-1.5 text-sm font-medium text-white/50">
-                            Welcome back, enter your credentials to continue.
-                        </p>
-                    </div>
-
-                    <div className="p-6 pt-0">
-                        <form onSubmit={loginUser}>
-                            <div className="mt-4">
-                                <div className="group relative rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
-                                    <div className="flex justify-between">
-                                        <label className="text-xs font-medium text-muted-foreground group-focus-within:text-white text-gray-400">
-                                            Email
-                                        </label>
-                                        <div className="absolute right-3 translate-y-2 text-green-200">
-                                            <FontAwesomeIcon
-                                                icon={faUser}
-                                                className="w-6 h-6"
-                                            />
-                                        </div>
-                                    </div>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={email}
-                                        onChange={(e) =>
-                                            setEmail(e.target.value)
-                                        }
-                                        placeholder="Email"
-                                        autoComplete="off"
-                                        className="block w-full border-0 bg-transparent p-0 text-sm file:my-1 file:rounded-full file:border-0 file:bg-accent file:px-4 file:py-2 file:font-medium placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 sm:leading-7 text-foreground"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mt-4">
-                                <div className="group relative rounded-lg border focus-within:border-sky-200 px-3 pb-1.5 pt-2.5 duration-200 focus-within:ring focus-within:ring-sky-300/30">
-                                    <div className="flex justify-between">
-                                        <label className="text-xs font-medium text-muted-foreground group-focus-within:text-white text-gray-400">
-                                            Password
-                                        </label>
-                                    </div>
-                                    <div className="flex items-center">
-                                        <input
-                                            type={
-                                                passwordVisible
-                                                    ? "text"
-                                                    : "password"
-                                            }
-                                            name="password"
-                                            value={password}
-                                            onChange={(e) =>
-                                                setPassword(e.target.value)
-                                            }
-                                            className="block w-full border-0 bg-transparent p-0 text-sm file:my-1 placeholder:text-muted-foreground/90 focus:outline-none focus:ring-0 focus:ring-teal-500 sm:leading-7 text-foreground"
-                                        />
-                                        <button
-                                            type="button"
-                                            className="absolute right-3 translate-y-2"
-                                            onClick={togglePasswordVisibility}
-                                        >
-                                            <FontAwesomeIcon
-                                                icon={
-                                                    passwordVisible
-                                                        ? faEyeSlash
-                                                        : faEye
-                                                }
-                                                className="w-6 h-6 text-gray-400"
-                                            />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 flex items-center justify-between">
-                                <a
-                                    className="text-sm font-medium text-foreground underline"
-                                    href="/forgot-password"
-                                >
-                                    Forgot password?
-                                </a>
-                            </div>
-
-                            {error && (
-                                <div className="mt-4 text-red-500 text-sm">
-                                    {error}
-                                </div>
-                            )}
-
-                            <div className="mt-4 flex items-center justify-end gap-x-2">
-                                <a
-                                    className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:ring hover:ring-white h-10 px-4 py-2 duration-200"
-                                    href="/signup"
-                                >
-                                    Signup
-                                </a>
-                                <button
-                                    className={`font-semibold hover:bg-black hover:text-white hover:ring hover:ring-white transition duration-300 inline-flex items-center justify-center rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-black h-10 px-4 py-2 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                                    type="submit"
-                                    disabled={loading}
-                                >
-                                    {loading ? "Logging in..." : "Log in"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="bg-white text-gray-900 min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="flex items-center justify-center mb-8">
+          <img 
+            src="/chat.png" 
+            alt="CHATWAVE Logo" 
+            className="w-16 h-16 mr-4 rounded-full" 
+          />
+          <h1 className="text-3xl font-bold text-blue-600">CHATWAVE</h1>
         </div>
-    );
+
+        <div className="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+          <h2 className="text-2xl font-semibold mb-2 text-center">
+            Welcome Back!
+          </h2>
+          <p className="text-gray-500 text-center mb-6">
+            Login to continue to Chatewave
+          </p>
+
+          <form onSubmit={loginUser} className="space-y-4">
+            <div>
+              <label 
+                htmlFor="email" 
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div>
+              <label 
+                htmlFor="password" 
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={passwordVisible ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  <FontAwesomeIcon 
+                    icon={passwordVisible ? faEyeSlash : faEye} 
+                  />
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              {loading ? "Logging in..." : "Log In"}
+            </button>
+          </form>
+
+          <p className="text-center mt-4 text-sm text-gray-600">
+            Don't have an account?{" "}
+            <a 
+              href="/signup" 
+              className="text-blue-600 hover:underline"
+            >
+              Signup
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

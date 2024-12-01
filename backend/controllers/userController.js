@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import imageKit from "../config/imagekit.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import User from "../models/userSchema.js";
 
 const generateToken = (id) => {
@@ -26,15 +26,12 @@ export const signUp = async (req, res) => {
       profileImage: uploadedImage.url,
     });
 
-    res
-      .status(201)
-      .json({
-        message: "Signup successful",
-        //name: user.name,
-        user
-        //email: user.email,
-        //profileImage: user.profileImage,
-      });
+    res.status(201).json({
+      message: "Signup successful",
+      name: user.name,
+      email: user.email,
+      profileImage: user.profileImage,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -45,15 +42,16 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    
-    if (!user) return res.status(404).json({ message: "User not found with this email" });
 
-    const isPasswordValid = await bcrypt.compare(password.trim(), user.password);
-    console.log("Plaintext Password:", password);
-    console.log("Stored Hashed Password:", user.password);
-    console.log("Password Match Result:", isPasswordValid);
-    
-    if (!isPasswordValid) return res.status(404).json({ message: "Invalid credentials" });
+    if (!user)
+      return res
+        .status(404)
+        .json({ message: "User not found with this email" });
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid)
+      return res.status(404).json({ message: "Invalid credentials" });
 
     const token = generateToken(user._id);
     res.cookie("token", token, {
@@ -61,9 +59,36 @@ export const login = async (req, res) => {
       secure: true,
       sameSite: "strict",
     });
-    
-    res.status(200).json({ message: "Login successful", user });
+
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        name: user.name,
+        email: user.email,
+        about: user.about,
+        profileImage:user.profileImage,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+
+// Logout Function
+export const logOut = async (req, res) => {
+	try {
+		// Clear the token cookie
+		res.cookie("token", "", { maxAge: 0, httpOnly: true });
+		return res.status(200).json({
+			message: "User logged out successfully",
+			success: true,
+		});
+	} catch (error) {
+		console.log(error.message);
+		res.status(500).json({
+			message: "Logout failed",
+			success: false,
+		});
+	}
 };

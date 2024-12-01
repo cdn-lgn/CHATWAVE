@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { WrapperComponentContext } from "./context/userContext";
 
 const App = () => {
   return (
@@ -15,7 +16,9 @@ const App = () => {
           path="/"
           element={
             <ProtectedRoute>
-              <Home />
+              <WrapperComponentContext>
+                <Home />
+              </WrapperComponentContext>
             </ProtectedRoute>
           }
         />
