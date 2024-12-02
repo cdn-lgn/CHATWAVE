@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { WrapperComponentContext } from "./context/userContext";
+import Settings from "./pages/Settings";
 
 const App = () => {
   return (
@@ -18,6 +19,16 @@ const App = () => {
             <ProtectedRoute>
               <WrapperComponentContext>
                 <Home />
+              </WrapperComponentContext>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <WrapperComponentContext>
+                <Settings />
               </WrapperComponentContext>
             </ProtectedRoute>
           }

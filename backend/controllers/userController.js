@@ -41,7 +41,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");;
 
     if (!user)
       return res
@@ -60,14 +60,12 @@ export const login = async (req, res) => {
       sameSite: "strict",
     });
 
+    const userObject = user.toObject()
+    delete userObject.password
+    
     res.status(200).json({
       message: "Login successful",
-      user: {
-        name: user.name,
-        email: user.email,
-        about: user.about,
-        profileImage:user.profileImage,
-      },
+      user:userObject,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
