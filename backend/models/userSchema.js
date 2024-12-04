@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     hideAccount: { type: Boolean},
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Blocked users
     lastSeen: { type: Date },
+    entityType: { type: String, default: "user", immutable: true }
   },
   { timestamps: true }
 );

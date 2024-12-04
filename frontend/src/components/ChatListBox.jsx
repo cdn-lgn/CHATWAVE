@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import ChatCard from "./ChatCard";
+import UserGroupListCard from "./UserGroupListCard";
 import { userContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -17,7 +17,6 @@ const ChatListBox = () => {
   const [plusOptions, setPlusOptions] = useState(false);
   const dropdownRef = useRef(null); // Create a ref for the dropdown
   const [newUserSearchTab, setNewUserSearchTab] = useState(false);
-  const [newGroupTab, setNewGroupTab] = useState(false);
 
   const handleSearch = (e) => setSearchTerm(e.target.value);
 
@@ -31,30 +30,35 @@ const ChatListBox = () => {
       name: "Tania Andrew",
       profileImage: "https://i.pravatar.cc/100?img=1",
       lastMessage: "Let’s catch up tomorrow!",
+      entityType:"user",
       time: "10:30 AM",
+
     },
     {
       name: "Jacob Jones",
       profileImage: "https://i.pravatar.cc/100?img=2",
       lastMessage: "Can you review the document?",
+      entityType:"user",
       time: "1d",
     },
     {
       name: "Emily Smith",
       profileImage: "https://i.pravatar.cc/100?img=3",
       lastMessage: "Sure, let me know the details.",
+      entityType:"user",
       time: "2d",
     },
     {
       name: "Candice Johnson",
       profileImage: "https://i.pravatar.cc/100?img=4",
       lastMessage: "Meeting rescheduled to 4 PM.",
+      entityType:"user",
       time: "3d",
     },
   ];
 
   const filteredChatList = chatList.filter((chat) =>
-    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+    chat.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleClickOutside = (event) => {
@@ -69,10 +73,6 @@ const ChatListBox = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    console.log(plusOptions); // Log the updated state
-  }, [plusOptions]);
 
   return (
     <div
@@ -104,7 +104,7 @@ const ChatListBox = () => {
       <div className="space-y-3">
         {filteredChatList.length > 0 ? (
           filteredChatList.map((chat, index) => (
-            <ChatCard key={index} chat={chat} theme={theme} />
+            <UserGroupListCard key={index} userOrGroup={chat} theme={theme} />
           ))
         ) : (
           <p style={{ color: theme.mutedText }} className="text-center">
@@ -152,14 +152,27 @@ const ChatListBox = () => {
         />
       </div>
 
-      {/* newUserSearchTab */}
+      {/* New User Search Tab */}
       {newUserSearchTab && (
-        <div className="absolute w-full px-2 py-2 rounded-xl flex top-1/2" style={{background:theme.secondary}}>
-          <div className="absolute right-2 top-2">
-            <FontAwesomeIcon icon={faClose}/>
+        <>
+          <div
+            className="fixed bg-black top-0 left-0 opacity-50 w-screen h-screen"
+            onClick={() => setNewUserSearchTab(false)}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2 py-2 rounded-xl"
+            style={{ background: theme.border }}
+          >
+            <div className=" flex items-center justify-end bottom-2 right-2">
+              <FontAwesomeIcon
+                icon={faClose}
+                onClick={() => setNewUserSearchTab(false)}
+                className="cursor-pointer"
+              />
+            </div>
+            <NewUserSearchBox setNewUserSearchTab={setNewUserSearchTab} />
           </div>
-          <NewUserSearchBox setNewUserSearchTab={setNewUserSearchTab} />
-        </div>
+        </>
       )}
     </div>
   );

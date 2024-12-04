@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { setUser } from "../redux/authUserSlice";
 
-const loginUrl = import.meta.env.VITE_USER_API;
+const loginUrl = `${import.meta.env.VITE_USER_API}/user/login`;
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -28,7 +28,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        `${loginUrl}/login`,
+        loginUrl,
         { email, password },
         {
           headers: { "Content-Type": "application/json" },

@@ -4,7 +4,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faLock, faEye, faEyeSlash, faCamera } from "@fortawesome/free-solid-svg-icons";
 
-const signupUrl = import.meta.env.VITE_USER_API;
+const signUpUrl = `${import.meta.env.VITE_USER_API}/user/signup`;
 
 const SignUp = () => {
   const [name, setName] = useState("");
@@ -58,7 +58,7 @@ const SignUp = () => {
         formData.append("profileImage", blob, filename);
       }
 
-      const response = await axios.post(`${signupUrl}/signup`, formData, {
+      const response = await axios.post(signUpUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

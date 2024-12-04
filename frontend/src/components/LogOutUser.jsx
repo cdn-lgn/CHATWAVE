@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { resetUser } from '../redux/authUserSlice';
 
-const logOutUrl = import.meta.env.VITE_USER_API;
+const logOutUrl = `${import.meta.env.VITE_USER_API}/user/logout`;
 
 const LogOutUser  = async (dispatch) => {
     try {
-        const response = await axios.post(`${logOutUrl}/logout`, {}, { withCredentials: true });
+        const response = await axios.post(logOutUrl, {}, { withCredentials: true });
         dispatch(resetUser()); // Dispatch the resetUser  action
         console.log(response.data);
         return response.data; // Return response data for further handling

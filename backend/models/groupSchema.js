@@ -6,6 +6,7 @@ const groupSchema = new mongoose.Schema({
     profileImage: { type: String, default: '' },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now },
+    entityType: { type: String, default: "group", immutable: true }
 });
 
 // Export the model

@@ -4,12 +4,13 @@ import cors from "cors";
 import cookieParser from "cookie-parser"
 import connectDB from "./config/db.js";
 import userAuthRoute from "./routes/userRoutes.js"
+import searchRoute from "./routes/searchRoute.js"
 
 
 dotenv.config()
 const app = express()
 const corsOptions = {
-    origin: "https://fluffy-eureka-wrrrq57wj456f9q5-5173.app.github.dev", // Replace with your frontend's URL
+    origin: "http://localhost:5173", // Replace with your frontend's URL
     credentials: true, // Allow cookies and other credentials
 };
 
@@ -22,8 +23,8 @@ app.use((req, res, next) => {
     next();
 });
 
-
 app.use('/api/user',userAuthRoute)
+app.use('/api/search',searchRoute)
 
 const PORT = 3000
 
