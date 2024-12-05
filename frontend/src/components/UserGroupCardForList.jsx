@@ -1,6 +1,6 @@
 import React from "react";
 
-const UserGroupListCard = ({userOrGroup, theme }) => {
+const UserGroupCardForList = ({userOrGroup, theme }) => {
   return (
     <div
       className="flex items-center gap-4 w-full rounded-lg cursor-pointer"
@@ -35,4 +35,4 @@ const UserGroupListCard = ({userOrGroup, theme }) => {
   );
 };
 
-export default UserGroupListCard;
+export default UserGroupCardForList;

@@ -1,11 +1,11 @@
 import express from "express"
 import authMiddleware from "../middleware/authMiddleware.js"
-import { searchAll } from '../controllers/searchController.js';
-
+import upload from '../config/multer.js';
+import { createGroup } from '../controllers/groupController.js';
 
 const router = express.Router()
 
-router.get('/searchAll',authMiddleware,searchAll)
+router.post('/createGroup',authMiddleware,upload.single("profileImage"),createGroup)
 // router.post('/searchUsers',authMiddleware,logOut)
 
 export default router

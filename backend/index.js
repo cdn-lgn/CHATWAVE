@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser"
 import connectDB from "./config/db.js";
 import userAuthRoute from "./routes/userRoutes.js"
 import searchRoute from "./routes/searchRoute.js"
+import groupRoute from "./routes/groupRoute.js"
 
 
 dotenv.config()
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/user',userAuthRoute)
+app.use('/api/group',groupRoute)
 app.use('/api/search',searchRoute)
 
 const PORT = 3000

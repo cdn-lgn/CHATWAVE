@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import UserGroupListCard from "./UserGroupListCard";
+import UserGroupCardForList from "./UserGroupCardForList";
 import { userContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,7 +9,8 @@ import {
   faUsers,
   faClose,
 } from "@fortawesome/free-solid-svg-icons";
-import NewUserSearchBox from "./NewUserSearchBox";
+import NewUserAndGroupSearchBox from "./NewUserAndGroupSearchBox";
+import CreateNewGroupBox from "./CreateNewGroupBox";
 
 const ChatListBox = () => {
   const { theme, width } = useContext(userContext); // Get theme context
@@ -17,6 +18,7 @@ const ChatListBox = () => {
   const [plusOptions, setPlusOptions] = useState(false);
   const dropdownRef = useRef(null); // Create a ref for the dropdown
   const [newUserSearchTab, setNewUserSearchTab] = useState(false);
+  const [newGroupTab, setNewGroupTab] = useState(false);
 
   const handleSearch = (e) => setSearchTerm(e.target.value);
 
@@ -30,29 +32,28 @@ const ChatListBox = () => {
       name: "Tania Andrew",
       profileImage: "https://i.pravatar.cc/100?img=1",
       lastMessage: "Let’s catch up tomorrow!",
-      entityType:"user",
+      entityType: "user",
       time: "10:30 AM",
-
     },
     {
       name: "Jacob Jones",
       profileImage: "https://i.pravatar.cc/100?img=2",
       lastMessage: "Can you review the document?",
-      entityType:"user",
+      entityType: "user",
       time: "1d",
     },
     {
       name: "Emily Smith",
       profileImage: "https://i.pravatar.cc/100?img=3",
       lastMessage: "Sure, let me know the details.",
-      entityType:"user",
+      entityType: "user",
       time: "2d",
     },
     {
       name: "Candice Johnson",
       profileImage: "https://i.pravatar.cc/100?img=4",
       lastMessage: "Meeting rescheduled to 4 PM.",
-      entityType:"user",
+      entityType: "user",
       time: "3d",
     },
   ];
@@ -104,7 +105,11 @@ const ChatListBox = () => {
       <div className="space-y-3">
         {filteredChatList.length > 0 ? (
           filteredChatList.map((chat, index) => (
-            <UserGroupListCard key={index} userOrGroup={chat} theme={theme} />
+            <UserGroupCardForList
+              key={index}
+              userOrGroup={chat}
+              theme={theme}
+            />
           ))
         ) : (
           <p style={{ color: theme.mutedText }} className="text-center">
@@ -134,7 +139,10 @@ const ChatListBox = () => {
               />
               <span>New Chat</span>
             </div>
-            <div className="flex items-center p-2 hover:bg-gray-100 cursor-pointer">
+            <div
+              className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => setNewGroupTab(true)}
+            >
               <FontAwesomeIcon
                 icon={faUsers}
                 className="mr-2"
@@ -160,17 +168,40 @@ const ChatListBox = () => {
             onClick={() => setNewUserSearchTab(false)}
           />
           <div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2 py-2 rounded-xl"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2 py-2 rounded-xl w-full sm:w-1/2 lg:w-1/3" // Adjusted width classes
             style={{ background: theme.border }}
           >
-            <div className=" flex items-center justify-end bottom-2 right-2">
+            <div className="flex items-center justify-end bottom-2 right-2 pb-2">
               <FontAwesomeIcon
                 icon={faClose}
                 onClick={() => setNewUserSearchTab(false)}
-                className="cursor-pointer"
+                className="cursor-pointer text-2xl"
               />
             </div>
-            <NewUserSearchBox setNewUserSearchTab={setNewUserSearchTab} />
+            <NewUserAndGroupSearchBox />
+          </div>
+        </>
+      )}
+
+      {/*new group create tab*/}
+      {newGroupTab && (
+        <>
+          <div
+            className="fixed bg-black top-0 left-0 opacity-50 w-screen h-screen"
+            onClick={() => setNewGroupTab(false)}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2 py-2 rounded-xl w-full sm:w-1/2 lg:w-1/3" // Adjusted width classes
+            style={{ background: theme.border }}
+          >
+            <div className="flex items-center justify-end bottom-2 right-2 pb-2">
+              <FontAwesomeIcon
+                icon={faClose}
+                onClick={() => setNewGroupTab(false)}
+                className="cursor-pointer text-2xl"
+              />
+            </div>
+            <CreateNewGroupBox />
           </div>
         </>
       )}
