@@ -4,6 +4,7 @@ import {
   faMessage,
   faPhone,
   faRightFromBracket,
+  faUsersGear,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext } from "react";
@@ -15,12 +16,12 @@ import { useNavigate } from "react-router-dom";
 const Navbar = () => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { theme, width } = useContext(userContext);
 
-  const settingsHandler =()=>{
-    navigate('/settings')
-  }
+  const settingsHandler = () => {
+    navigate("/settings");
+  };
 
   const handleLogout = async () => {
     try {
@@ -60,6 +61,14 @@ const Navbar = () => {
               className="text-xl mb-2 cursor-pointer"
               style={{ color: theme.primary }}
             />
+            {user?.userCreatedGroups && (
+              <FontAwesomeIcon
+                icon={faUsersGear}
+                className="text-xl mb-2 cursor-pointer"
+                style={{ color: theme.primary }}
+              />
+            )}
+
             <FontAwesomeIcon
               icon={faPhone}
               className="text-xl cursor-pointer"
@@ -116,7 +125,60 @@ const Navbar = () => {
 };
 
 const BottomBarForMobile = () => {
-  return <div>bottombar</div>;
+  const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { theme, width } = useContext(userContext);
+
+  const settingsHandler = () => {
+    navigate("/settings");
+  };
+
+  const handleLogout = async () => {
+    try {
+      const result = await LogOutUser(dispatch);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  if (width <= 768)
+    return (
+      <div
+        className="flex items-center justify-center w-full rounded-r-xl"
+        style={{ backgroundColor: theme.background }}
+      >
+        <div className="w-full flex items-center justify-between px-4 py-1">
+
+            <FontAwesomeIcon
+              icon={faMessage}
+              className="text-xl mb-2 cursor-pointer"
+              style={{ color: theme.primary }}
+            />
+            {user?.userCreatedGroups && (
+              <FontAwesomeIcon
+                icon={faUsersGear}
+                className="text-xl mb-2 cursor-pointer"
+                style={{ color: theme.primary }}
+              />
+            )}
+
+            <FontAwesomeIcon
+              icon={faPhone}
+              className="text-xl cursor-pointer"
+              style={{ color: theme.primary }}
+            />
+
+
+            <FontAwesomeIcon
+              icon={faGear}
+              className="text-xl mb-2 cursor-pointer"
+              style={{ color: theme.primary }}
+              onClick={settingsHandler}
+            />
+        </div>
+      </div>
+    );
 };
 
 export { Navbar, BottomBarForMobile };
