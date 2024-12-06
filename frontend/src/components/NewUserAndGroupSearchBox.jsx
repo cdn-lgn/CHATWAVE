@@ -14,17 +14,15 @@ const NewUserAndGroupSearchBox = () => {
 
   const handleKeyDown = async (event) => {
     if (event.key === "Enter") {
-
-      if(searchQuery.trim() === "") return setSearchResult("")
+      if (searchQuery.trim() === "") return setSearchResult("");
       // Call the backend search API using Axios
       try {
         const response = await axios.get(searchAllUrl, {
           params: { query: searchQuery.trim() }, // Pass the query as a parameter
           withCredentials: true,
         });
-        const results = Object.values(response.data.searchResult); // Get the data from the response
-        setSearchResult(results); // Update the state with the results
-        console.log("Search Results:", results); // Log the results
+        console.log(response.data.searchResult);
+        setSearchResult(response.data.searchResult); // Update the state with the results
       } catch (error) {
         console.error("Error fetching search results:", error);
       }
@@ -54,39 +52,51 @@ const NewUserAndGroupSearchBox = () => {
         />
       </div>
       {/* Search result (users and groups) */}
-      <div className="flex items-center justify-center gap-2 flex-col rounded-xl p-2" style={{background:theme.background}}>
+      <div
+        className="flex items-center justify-center gap-2 flex-col rounded-xl p-2"
+        style={{ background: theme.background }}
+      >
         {searchResult.length > 0 ? (
-        searchResult.map((item) => (
-          <div
-            key={item._id} // Add a unique key prop
-            className="flex items-center gap-4 w-full rounded-lg cursor-pointer"
-            style={{ background: theme.border }}
-          >
-            {/* Profile Image */}
-            <img
-              src={item?.profileImage}
-              alt={item?.name}
-              className="w-12 h-12 rounded-full object-cover"
-            />
+          searchResult.map((item) => (
+            <div
+              key={item._id} // Add a unique key prop
+              className="flex items-center gap-2 w-full rounded-lg cursor-pointer"
+              style={{ background: theme.border }}
+            >
+              {/* Profile Image */}
+              <img
+                src={item?.profileImage}
+                alt={item?.name}
+                className="w-12 h-12 rounded-full object-cover"
+              />
 
-            {/* Item Details */}
-            <div>
-              <div className="flex items-center justify-between">
-                <h5 className="font-medium font-extrabold" style={{ color: theme.text }}>
-                  {item?.name}
-                </h5>
-                {item?.entityType === "group" && (
-                  <p className="text-[12px]" style={{ color: theme.mutedText }}>
-                    {item?.entityType}
-                  </p>
-                )}
+              {/* Item Details */}
+              <div className="flex flex-col w-full">
+                {/* Group Name and Entity Type */}
+                <div className="flex justify-between items-center w-full px-2">
+                  <h5
+                    className="font-medium font-extrabold"
+                    style={{ color: theme.text }}
+                  >
+                    {item?.name}
+                  </h5>
+
+                  {/* Entity Type (e.g., "group") */}
+                  {item?.entityType === "group" && (
+                    <p
+                      className="text-[12px]"
+                      style={{ color: theme.mutedText }}
+                    >
+                      {item?.entityType}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))
-      ) : (
-        <p style={{ color: theme.mutedText }}>enter name and search</p> //press enter
-      )}
+          ))
+        ) : (
+          <p style={{ color: theme.mutedText }}>enter name and search</p> //press enter
+        )}
       </div>
     </div>
   );

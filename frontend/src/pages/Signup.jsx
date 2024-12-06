@@ -28,9 +28,7 @@ const SignUp = () => {
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setProfileImage(URL.createObjectURL(file));
-    }
+    setProfileImage(file);
   };
 
   const signUpUser = async (e) => {
@@ -49,13 +47,8 @@ const SignUp = () => {
       formData.append("name", name);
       formData.append("email", email);
       formData.append("password", password);
-
       if (profileImage) {
-        const response = await fetch(profileImage);
-        const blob = await response.blob();
-        const formattedName = name.replace(/\s+/g, "_");
-        const filename = `${formattedName}.png`;
-        formData.append("profileImage", blob, filename);
+        formData.append("profileImage", profileImage);
       }
 
       const response = await axios.post(signUpUrl, formData, {
@@ -65,7 +58,7 @@ const SignUp = () => {
       console.log(response.data);
       navigate("/login");
     } catch (error) {
-      console.log("Signup failed", error);
+      console.error("Signup failed", error);
       setError("Signup failed. Please try again.");
     } finally {
       setLoading(false);
@@ -96,7 +89,7 @@ const SignUp = () => {
             <label htmlFor="profileImage" className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-full cursor-pointer">
               {profileImage ? (
                 <img
-                  src={profileImage}
+                  src={URL.createObjectURL(profileImage)}
                   alt="Profile Preview"
                   className="rounded-full w-full h-full object-cover"
                 />
@@ -113,7 +106,7 @@ const SignUp = () => {
             />
           </div>
 
-          <form className="space-y-4" onSubmit={signUpUser }>
+          <form className="space-y-4" onSubmit={signUpUser}>
             <div>
               <label 
                 htmlFor="name" 

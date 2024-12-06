@@ -15,6 +15,7 @@ export const signUp = async (req, res) => {
     const uploadedImage = await imageKit.upload({
       file: file.buffer,
       fileName: `${Date.now()}-${file.originalname}`,
+      folder: "chatwave/userProfile",
     });
 
     const hashedPassword = await bcrypt.hash(password, 10);

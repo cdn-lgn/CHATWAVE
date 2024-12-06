@@ -56,7 +56,7 @@ const CreateNewGroupBox = () => {
 				>
 					{profileImage ? (
 						<img
-							src={profileImage}
+							src={URL.createObjectURL(profileImage)}
 							alt="Profile Preview"
 							className="object-cover w-full h-full"
 						/>

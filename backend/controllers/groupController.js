@@ -1,12 +1,12 @@
-import imageKit from '../config/imagekit.js';
-import Group from '../models/groupSchema.js'; // Ensure the Group model is imported
+import imageKit from "../config/imagekit.js";
+import Group from "../models/groupSchema.js"; // Ensure the Group model is imported
 
 export const createGroup = async (req, res) => {
 	try {
 		// Validate input
 		const { name, description } = req.body;
 		if (!name || !description) {
-			console.log("Name and description are required.")
+			console.log("Name and description are required.");
 			return res.status(400).json({
 				message: "Name and description are required.",
 				success: false,
@@ -14,27 +14,27 @@ export const createGroup = async (req, res) => {
 		}
 
 		// Validate file
-		console.log(req)
+		console.log(req.user);
 		const file = req.file;
 		if (!file) {
-			console.log("Profile image is required.")
+			console.log("Profile image is required.");
 			return res.status(400).json({
 				message: "Profile image is required.",
 				success: false,
 			});
 		}
 
-		// Upload the file to ImageKit
 		const uploadedImage = await imageKit.upload({
-			file: file.buffer, // File buffer from multer
-			fileName: `${Date.now()}-${file.originalname}`, // Unique filename
+			file: file.buffer,
+			fileName: `${Date.now()}-${file.originalname}`,
+			folder: "chatwave/groupProfile",
 		});
 
 		// Create a new group
 		const group = await Group.create({
 			name,
 			description,
-			owner: req.user._id, // Assuming `req.user` is set by auth middleware
+			owner: req.user.id, // Assuming `req.user` is set by auth middleware
 			profileImage: uploadedImage.url,
 		});
 
