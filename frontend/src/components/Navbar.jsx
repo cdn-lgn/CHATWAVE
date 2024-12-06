@@ -17,7 +17,8 @@ const Navbar = () => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { theme, width } = useContext(userContext);
+  const { theme, width, middleComponent, setMiddleComponent } =
+    useContext(userContext);
 
   const settingsHandler = () => {
     navigate("/settings");
@@ -49,30 +50,46 @@ const Navbar = () => {
             </div>
             <FontAwesomeIcon
               icon={faBell}
-              className="text-xl mt-2 cursor-pointer"
+              className="text-xl mt-2 cursor-pointer transition-all duration-300"
               style={{ color: theme.primary }}
             />
           </div>
 
           {/* Message and Phone Icons */}
-          <div className="flex flex-col gap-1 items-center mb-4">
+          <div className="flex flex-col gap-3 items-center mb-4">
             <FontAwesomeIcon
               icon={faMessage}
-              className="text-xl mb-2 cursor-pointer"
-              style={{ color: theme.primary }}
+              className="text-xl cursor-pointer p-3 rounded-full transition-all duration-300"
+              style={
+                middleComponent === "chatList"
+                  ? { background: theme.button, color: theme.background }
+                  : { color: theme.primary }
+              }
+              onClick={() => setMiddleComponent("chatList")}
             />
+
             {user?.userCreatedGroups && (
               <FontAwesomeIcon
                 icon={faUsersGear}
-                className="text-xl mb-2 cursor-pointer"
-                style={{ color: theme.primary }}
+                className="text-xl cursor-pointer p-3 rounded-full transition-all duration-300"
+                style={
+                  middleComponent === "groupList"
+                    ? { background: theme.button, color: theme.background }
+                    : { color: theme.primary }
+                }
+                onClick={() => setMiddleComponent("groupList")}
               />
             )}
 
             <FontAwesomeIcon
               icon={faPhone}
-              className="text-xl cursor-pointer"
-              style={{ color: theme.primary }}
+              className="text-xl cursor-pointer p-3 rounded-full"
+              style={
+                middleComponent === "callList"
+                  ? { background: theme.button, color: theme.background }
+                  : { color: theme.primary }
+              }
+              onClick={() => setMiddleComponent("callList")}
             />
           </div>
 
@@ -128,7 +145,8 @@ const BottomBarForMobile = () => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { theme, width } = useContext(userContext);
+  const { theme, width, middleComponent, setMiddleComponent } =
+    useContext(userContext);
 
   const settingsHandler = () => {
     navigate("/settings");
@@ -149,33 +167,46 @@ const BottomBarForMobile = () => {
         style={{ backgroundColor: theme.background }}
       >
         <div className="w-full flex items-center justify-between px-4 py-1">
-
+          <FontAwesomeIcon
+            icon={faMessage}
+            className="text-xl cursor-pointer py-3 px-6 rounded-full transition-all duration-300"
+            style={
+              middleComponent === "chatList"
+                ? { background: theme.button, color: theme.background }
+                : { color: theme.primary }
+            }
+            onClick={() => setMiddleComponent("chatList")}
+          />
+          {user?.userCreatedGroups && (
             <FontAwesomeIcon
-              icon={faMessage}
-              className="text-xl mb-2 cursor-pointer"
-              style={{ color: theme.primary }}
+              icon={faUsersGear}
+              className="text-xl cursor-pointer py-3 px-6 rounded-full transition-all duration-300"
+              style={
+                middleComponent === "groupList"
+                  ? { background: theme.button, color: theme.background }
+                  : { color: theme.primary }
+              }
+              onClick={() => setMiddleComponent("groupList")}
             />
-            {user?.userCreatedGroups && (
-              <FontAwesomeIcon
-                icon={faUsersGear}
-                className="text-xl mb-2 cursor-pointer"
-                style={{ color: theme.primary }}
-              />
-            )}
+          )}
 
-            <FontAwesomeIcon
-              icon={faPhone}
-              className="text-xl cursor-pointer"
-              style={{ color: theme.primary }}
-            />
+          <FontAwesomeIcon
+            icon={faPhone}
+            className="text-xl cursor-pointer py-3 px-6 rounded-full transition-all duration-300"
+            style={
+              middleComponent === "callList"
+                ? { background: theme.button, color: theme.background }
+                : { color: theme.primary }
+            }
+            onClick={() => setMiddleComponent("callList")}
+          />
 
-
-            <FontAwesomeIcon
-              icon={faGear}
-              className="text-xl mb-2 cursor-pointer"
-              style={{ color: theme.primary }}
-              onClick={settingsHandler}
-            />
+          <FontAwesomeIcon
+            icon={faGear}
+            className="text-xl mb-2 cursor-pointer"
+            style={{ color: theme.primary }}
+            onClick={settingsHandler}
+          />
         </div>
       </div>
     );

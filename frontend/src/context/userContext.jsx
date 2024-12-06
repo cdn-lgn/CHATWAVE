@@ -7,10 +7,10 @@ const userContext = createContext();
 
 const WrapperComponentContext = ({ children }) => {
     const [theme, setTheme] = useState(() => {
-        // Get the theme from local storage or use the default
         const savedTheme = localStorage.getItem('theme');
         return savedTheme ? JSON.parse(savedTheme) : lightTheme;
     });
+    const [middleComponent, setMiddleComponent] = useState("chatList")
     const width = useScreenWidth()
 
     // Update local storage whenever the theme changes
@@ -18,7 +18,7 @@ const WrapperComponentContext = ({ children }) => {
         localStorage.setItem('theme', JSON.stringify(theme));
     }, [theme]);
     return (
-        <userContext.Provider value={{ theme, setTheme, width }}>
+        <userContext.Provider value={{ theme, setTheme, width, middleComponent, setMiddleComponent }}>
             {children}
         </userContext.Provider>
     );

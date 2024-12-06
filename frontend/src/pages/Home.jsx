@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { BottomBarForMobile, Navbar } from "../components/Navbar";
 import ChatListBox from "../components/ChatListBox";
 import ConversationBox from "../components/ConversationBox";
+import GroupListBox from "../components/GroupListBox";
+import CallListBox from "../components/CallListBox";
 
 const Home = () => {
   const [mainViewForMobile, setMainViewForMobile] = useState("ChatListBox");
-  const { theme, width } = useContext(userContext); // Access the theme from context
+  const { theme, width, middleComponent } = useContext(userContext); // Access the theme from context
   const navigate = useNavigate();
 
   if (width > 768) {
@@ -17,7 +19,9 @@ const Home = () => {
         style={{ backgroundColor: theme.secondary }}
       >
         <Navbar />
-        <ChatListBox />
+        {middleComponent === "chatList" && <ChatListBox />}
+        {middleComponent === "groupList" && <GroupListBox />}
+        {middleComponent === "callList" && <CallListBox />}
         <ConversationBox />
       </div>
     );
@@ -32,7 +36,9 @@ const Home = () => {
         {mainViewForMobile === "ChatListBox" && (
           <>
             <Navbar />
-            <ChatListBox /> 
+            {middleComponent === "chatList" && <ChatListBox />}
+            {middleComponent === "groupList" && <GroupListBox />}
+            {middleComponent === "callList" && <CallListBox />}
             <BottomBarForMobile />
           </>
         )}
