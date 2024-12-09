@@ -8,7 +8,7 @@ import axios from "axios"; // Import Axios
 const searchAllUrl = `${import.meta.env.VITE_USER_API}/search/searchAll`;
 
 const NewUserAndGroupSearchBox = () => {
-  const { theme } = useContext(userContext);
+  const { theme,receiver, setReceiver, } = useContext(userContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState([]);
 
@@ -62,6 +62,7 @@ const NewUserAndGroupSearchBox = () => {
               key={item._id} // Add a unique key prop
               className="flex items-center gap-2 w-full rounded-lg cursor-pointer"
               style={{ background: theme.border }}
+              onClick={()=>{setReceiver(item)}}
             >
               {/* Profile Image */}
               <img

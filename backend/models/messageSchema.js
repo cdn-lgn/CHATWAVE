@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
-    chatId: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    content: { type: String },
-    attachments: [{ type: String }], // File links
+    senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User",required: true },
+    recevierId: { type: mongoose.Schema.Types.ObjectId, ref: "User",required: true },
+    type:{type:String,required: true}
+    message: { type: String,required: true },
     createdAt: { type: Date, default: Date.now },
-    deletedFor: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 });
 
 export default mongoose.model("Message", messageSchema);

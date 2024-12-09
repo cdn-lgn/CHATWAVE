@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { WrapperComponentContext } from "./context/userContext";
 import Settings from "./pages/Settings";
+import { SocketProvider } from "./context/socketContext";
 
 const App = () => {
   return (
@@ -17,9 +18,11 @@ const App = () => {
           path="/"
           element={
             <ProtectedRoute>
-              <WrapperComponentContext>
-                <Home />
-              </WrapperComponentContext>
+              <SocketProvider>
+                <WrapperComponentContext>
+                  <Home />
+                </WrapperComponentContext>
+              </SocketProvider>
             </ProtectedRoute>
           }
         />
@@ -27,9 +30,11 @@ const App = () => {
           path="/settings"
           element={
             <ProtectedRoute>
-              <WrapperComponentContext>
-                <Settings />
-              </WrapperComponentContext>
+              <SocketProvider>
+                <WrapperComponentContext>
+                  <Settings />
+                </WrapperComponentContext>
+              </SocketProvider>
             </ProtectedRoute>
           }
         />

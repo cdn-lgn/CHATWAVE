@@ -1,4 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { SocketContext } from "../context/socketContext";
 import { userContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV, faPhone } from "@fortawesome/free-solid-svg-icons";
@@ -7,94 +9,129 @@ import ImageBox from "./ImageBox";
 import VoiceNoteBox from "./VoiceNoteBox";
 
 const ConversationBox = () => {
-  const { theme,width } = useContext(userContext); // Get theme context
+  const { theme, width, receiver } = useContext(userContext); // Get theme context
+  const socket = useContext(SocketContext).current;
+  const user = useSelector((state) => state.user.user);
 
-  // Dummy Messages
-  const messages = [
-    { id: 1, type: "text", sender: "user", content: "Hi there! How are you?" },
-    { id: 2, type: "text", sender: "friend", content: "I'm good, thanks! How about you?" },
-    { id: 3, type: "image", sender: "user", content: "https://via.placeholder.com/150" },
-    { id: 4, type: "voice", sender: "friend", content: "voice_note_1.mp3" },
-    { id: 5, type: "text", sender: "user", content: "Let's catch up soon!" },
-  ];
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+
+  useEffect(() => {
+    if (socket) {
+      const handleReceiveMessage = (data) => {
+        console.log(data);
+        setMessages((prevMessages) => [...prevMessages, data]);
+      };
+      socket.on("receive_message", handleReceiveMessage);
+      return () => {
+        socket.off("receive_message", handleReceiveMessage);
+      };
+    }
+  }, [socket]);
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+
+    if (newMessage.trim() && socket) {
+      socket.emit("send_message", {
+        senderID: user._id,
+        receiverID: receiver._id,
+        content: {
+          type: "text",
+          message: newMessage,
+        },
+      });
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          senderID: user._id,
+          content: {
+            type: "text",
+            message: newMessage,
+          },
+        },
+      ]);
+      setNewMessage("");
+    } else {
+      console.log("message is empty or socket NotFound :(");
+    }
+  };
 
   return (
     <div
       style={{ backgroundColor: theme.background, color: theme.text }}
-      className={`flex flex-col h-dvh ${width<=768 ? "min-w-full" :  "w-2/3"}`}
+      className={`flex flex-col h-dvh ${width <= 768 ? "min-w-full" : "w-2/3"}`}
     >
-      {/* Conversation Header */}
-      <div
-        style={{
-          backgroundColor: theme.secondary,
-          borderBottom: `1px solid ${theme.border}`,
-        }}
-        className="flex justify-between items-center p-4"
-      >
-        <div className="flex items-center">
-          <img
-            src="https://via.placeholder.com/40"
-            alt="Friend Avatar"
-            className="w-10 h-10 rounded-full mr-4"
-          />
-          <div>
-            <h4 className="font-bold">Friend Name</h4>
-            <p className="text-sm" style={{ color: theme.mutedText }}>
-              Online
-            </p>
+      {receiver && (
+        <>
+          {/* Conversation Header */}
+          <div
+            style={{
+              backgroundColor: theme.secondary,
+              borderBottom: `1px solid ${theme.border}`,
+            }}
+            className="flex justify-between items-center p-4"
+          >
+            <div className="flex items-center">
+              <img
+                src={receiver.profileImage}
+                alt="Friend Avatar"
+                className="w-10 h-10 rounded-full mr-4"
+              />
+              <div>
+                <h4 className="font-bold">{receiver.name}</h4>
+                <p className="text-sm" style={{ color: theme.mutedText }}>
+                  Online
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-4">
+              <button className="text-xl">
+                <FontAwesomeIcon icon={faPhone} />
+              </button>
+              <button className="text-xl">
+                <FontAwesomeIcon icon={faEllipsisV} />
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="flex space-x-4">
-          <button className="text-xl">
-            <FontAwesomeIcon icon={faPhone} />
-          </button>
-          <button className="text-xl">
-            <FontAwesomeIcon icon={faEllipsisV} />
-          </button>
-        </div>
-      </div>
 
-      {/* Message Area */}
-      <div className="flex-grow p-4 overflow-y-auto">
-        {messages.map((message) => {
-          switch (message.type) {
-            case "text":
-              return <MessageBox key={message.id} message={message} theme={theme} />;
-            case "image":
-              return <ImageBox key={message.id} message={message} theme={theme} />;
-            case "voice":
-              return <VoiceNoteBox key={message.id} message={message} theme={theme} />;
-            default:
-              return null;
-          }
-        })}
-      </div>
+          {/* Message Area */}
+          <div className="flex-grow p-4 overflow-y-auto">
+            {messages.map((message, idx) => (
+              <MessageBox key={idx} message={message} theme={theme} />
+            ))}
+          </div>
 
-      {/* Input Area */}
-      <div
-        style={{
-          backgroundColor: theme.secondary,
-          borderTop: `1px solid ${theme.border}`,
-        }}
-        className="p-4 flex items-center space-x-4"
-      >
-        <input
-          type="text"
-          placeholder="Type a message..."
-          style={{
-            backgroundColor: theme.inputBackground,
-            color: theme.text,
-            borderColor: theme.border,
-          }}
-          className="flex-grow p-3 rounded-lg border"
-        />
-        <button
-          style={{ backgroundColor: theme.button, color: "#FFFFFF" }}
-          className="px-4 py-2 rounded-lg"
-        >
-          Send
-        </button>
-      </div>
+          {/* Input Area */}
+          <div
+            style={{
+              backgroundColor: theme.secondary,
+              borderTop: `1px solid ${theme.border}`,
+            }}
+            className="p-4 flex items-center space-x-4"
+          >
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)} // Handle message input
+              placeholder="Type a message..."
+              style={{
+                backgroundColor: theme.inputBackground,
+                color: theme.text,
+                borderColor: theme.border,
+              }}
+              className="flex-grow p-3 rounded-lg border"
+            />
+            <button
+              onClick={sendMessage}
+              style={{ backgroundColor: theme.button, color: "#FFFFFF" }}
+              className="px-4 py-2 rounded-lg"
+            >
+              Send
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -8,8 +8,13 @@ import GroupListBox from "../components/GroupListBox";
 import CallListBox from "../components/CallListBox";
 
 const Home = () => {
-  const [mainViewForMobile, setMainViewForMobile] = useState("ChatListBox");
-  const { theme, width, middleComponent } = useContext(userContext); // Access the theme from context
+  const {
+    theme,
+    width,
+    middleComponent,
+    mainViewForMobile,
+    setMainViewForMobile,
+  } = useContext(userContext); // Access the theme from context
   const navigate = useNavigate();
 
   if (width > 768) {
@@ -33,7 +38,7 @@ const Home = () => {
         className="w-screen h-screen flex items-center justify-start gap-1 flex-col transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
-        {mainViewForMobile === "ChatListBox" && (
+        {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />
             {middleComponent === "chatList" && <ChatListBox />}
