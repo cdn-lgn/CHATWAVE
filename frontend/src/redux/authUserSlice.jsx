@@ -11,11 +11,13 @@ const authUserSlice = createSlice({
     reducers: {
         // Reducer function to set the user
         setUser: (state, action) => {
-            state.user = action.payload; // Set the user data to the state
+            state.user = action.payload; 
+            state.lastUpdated = Date.now()
         },
         // Reducer function to reset the user (set it to null)
         resetUser: (state) => {
             state.user = null; // Reset the user to null
+            state.lastUpdated=null
         },
     },
 });

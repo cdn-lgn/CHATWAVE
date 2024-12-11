@@ -11,8 +11,8 @@ export const SocketProvider = ({ children }) => {
 	useEffect(() => {
 		if (user) {
 			socket.current = io("http://localhost:3000", {
-				query: { userId: user._id, name: user.name },
 				transport: ["websocket"],
+				withCredentials: true
 			});
 
 			socket.current.on("connect", () => {

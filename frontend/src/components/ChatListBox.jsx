@@ -13,10 +13,10 @@ import NewUserAndGroupSearchBox from "./NewUserAndGroupSearchBox";
 import CreateNewGroupBox from "./CreateNewGroupBox";
 
 const ChatListBox = () => {
-  const { theme, width } = useContext(userContext); // Get theme context
+  const { theme, width, chatList, setChatList } = useContext(userContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [plusOptions, setPlusOptions] = useState(false);
-  const dropdownRef = useRef(null); // Create a ref for the dropdown
+  const dropdownRef = useRef(null); 
   const [newUserSearchTab, setNewUserSearchTab] = useState(false);
   const [newGroupTab, setNewGroupTab] = useState(false);
 
@@ -26,41 +26,9 @@ const ChatListBox = () => {
     setPlusOptions((prev) => !prev);
   };
 
-  // Example Chat Data
-  const chatList = [
-    {
-      name: "Tania Andrew",
-      profileImage: "https://i.pravatar.cc/100?img=1",
-      lastMessage: "Let’s catch up tomorrow!",
-      entityType: "user",
-      time: "10:30 AM",
-    },
-    {
-      name: "Jacob Jones",
-      profileImage: "https://i.pravatar.cc/100?img=2",
-      lastMessage: "Can you review the document?",
-      entityType: "user",
-      time: "1d",
-    },
-    {
-      name: "Emily Smith",
-      profileImage: "https://i.pravatar.cc/100?img=3",
-      lastMessage: "Sure, let me know the details.",
-      entityType: "user",
-      time: "2d",
-    },
-    {
-      name: "Candice Johnson",
-      profileImage: "https://i.pravatar.cc/100?img=4",
-      lastMessage: "Meeting rescheduled to 4 PM.",
-      entityType: "user",
-      time: "3d",
-    },
-  ];
-
-  const filteredChatList = chatList.filter((chat) =>
-    chat.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+const filteredChatList = Array.isArray(chatList) ? chatList.filter((chat) =>
+    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+) : []
 
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -103,8 +71,8 @@ const ChatListBox = () => {
 
       {/* Chat List */}
       <div className="space-y-3">
-        {filteredChatList.length > 0 ? (
-          filteredChatList.map((chat, index) => (
+        {filteredChatList?.length > 0 ? (
+          filteredChatList?.map((chat, index) => (
             <UserGroupCardForList
               key={index}
               userOrGroup={chat}

@@ -9,53 +9,88 @@ import ImageBox from "./ImageBox";
 import VoiceNoteBox from "./VoiceNoteBox";
 
 const ConversationBox = () => {
-  const { theme, width, receiver } = useContext(userContext); // Get theme context
+  const { theme, width, receiver,chatList } = useContext(userContext); // Get theme context
   const socket = useContext(SocketContext).current;
   const user = useSelector((state) => state.user.user);
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
-  useEffect(() => {
-    if (socket) {
-      const handleReceiveMessage = (data) => {
-        console.log(data);
-        setMessages((prevMessages) => [...prevMessages, data]);
-      };
-      socket.on("receive_message", handleReceiveMessage);
-      return () => {
-        socket.off("receive_message", handleReceiveMessage);
-      };
+const ChatExist = (chatList, receiver, user) => {
+  return chatList.some((chat) => {
+    if (chat.isGroupChat) {
+      return chat.group && chat.group._id === receiver._id;
+    } else {
+      return (
+        chat.participants.includes(user._id) &&
+        chat.participants.includes(receiver._id)
+      );
     }
-  }, [socket]);
+  });
+};
 
-  const sendMessage = (e) => {
-    e.preventDefault();
 
-    if (newMessage.trim() && socket) {
-      socket.emit("send_message", {
+useEffect(() => {
+  if (!socket) return;
+  
+  const handleReceiveMessage = (data) => {
+    const { chat, senderID, content } = data;
+
+    const isChatInList = chatList.some((existingChat) => existingChat._id === chat._id);
+    if (!isChatInList) {
+      setChatList((prevChatList) => [...prevChatList, chat]);
+    } else {
+      setChatList((prevChatList) =>
+        prevChatList.map((existingChat) =>
+          existingChat._id === chat._id
+            ? { ...existingChat, lastMessage: chat.lastMessage }
+            : existingChat
+        )
+      );
+    }
+    setMessages((prevMessages) => [...prevMessages, { senderID, content }]);
+  };
+
+  socket.on("receive_message", handleReceiveMessage);
+
+  return () => {
+    socket.off("receive_message", handleReceiveMessage);
+  };
+}, [socket, chatList]);
+
+
+const sendMessage = (e) => {
+  e.preventDefault();
+
+  // Check if chat exists
+  const doesChatExist = ChatExist(chatList, receiver, user);
+
+  if (newMessage.trim() && socket) {
+    socket.emit("send_message", {
+      senderID: user._id,
+      receiverID: receiver._id,
+      content: {
+        type: "text",
+        message: newMessage,
+      },
+      doesChatExist,
+    });
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
         senderID: user._id,
-        receiverID: receiver._id,
         content: {
           type: "text",
           message: newMessage,
         },
-      });
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          senderID: user._id,
-          content: {
-            type: "text",
-            message: newMessage,
-          },
-        },
-      ]);
-      setNewMessage("");
-    } else {
-      console.log("message is empty or socket NotFound :(");
-    }
-  };
+      },
+    ]);
+    setNewMessage("");
+  } else {
+    console.log("Message is empty or socket not found :(");
+  }
+};
+
 
   return (
     <div

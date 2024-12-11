@@ -13,8 +13,6 @@ export const createGroup = async (req, res) => {
 			});
 		}
 
-		// Validate file
-		console.log(req.user);
 		const file = req.file;
 		if (!file) {
 			console.log("Profile image is required.");

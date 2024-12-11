@@ -12,8 +12,27 @@ const persistConfig = {
 // Create a persisted reducer
 const persistedReducer = persistReducer(persistConfig, authUserReducer);
 
+
+
+const clearStoreMiddleware = store => next => action => {
+    const state = store.getState();
+    const now = Date.now();
+    const twoDaysInMillis = 172800000; // 2 days in milliseconds
+
+    // Check if lastUpdated exists and if it's older than 2 days
+    if (state.user.lastUpdated && (now - state.user.lastUpdated > twoDaysInMillis)) {
+        store.dispatch(resetUser ()); // Clear user data if older than 2 days
+    }
+
+    return next(action);
+};
+
+
+
 const store = configureStore({
-  reducer: { user: persistedReducer },
+    reducer: { user: persistedReducer },
+    middleware: (getDefaultMiddleware) => 
+        getDefaultMiddleware().concat(clearStoreMiddleware)
 });
 
 // Create a persistor

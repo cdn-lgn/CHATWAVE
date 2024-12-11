@@ -68,7 +68,7 @@ const Navbar = () => {
               onClick={() => setMiddleComponent("chatList")}
             />
 
-            {user?.userCreatedGroups && (
+            {user?.userCreatedGroups !=false && (
               <FontAwesomeIcon
                 icon={faUsersGear}
                 className="text-xl cursor-pointer p-3 rounded-full transition-all duration-300"

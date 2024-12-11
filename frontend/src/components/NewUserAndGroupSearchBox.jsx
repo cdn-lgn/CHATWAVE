@@ -1,14 +1,13 @@
-// new chat search component
 import React, { useContext, useState } from "react";
 import { userContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios"; // Import Axios
+import axios from "axios";
 
 const searchAllUrl = `${import.meta.env.VITE_USER_API}/search/searchAll`;
 
 const NewUserAndGroupSearchBox = () => {
-  const { theme,receiver, setReceiver, } = useContext(userContext);
+  const { theme,receiver, setReceiver,chatList, setChatList } = useContext(userContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState([]);
 
@@ -18,7 +17,7 @@ const NewUserAndGroupSearchBox = () => {
       // Call the backend search API using Axios
       try {
         const response = await axios.get(searchAllUrl, {
-          params: { query: searchQuery.trim() }, // Pass the query as a parameter
+          params: { query: searchQuery.trim() },
           withCredentials: true,
         });
         console.log(response.data.searchResult);
@@ -62,7 +61,7 @@ const NewUserAndGroupSearchBox = () => {
               key={item._id} // Add a unique key prop
               className="flex items-center gap-2 w-full rounded-lg cursor-pointer"
               style={{ background: theme.border }}
-              onClick={()=>{setReceiver(item)}}
+              onClick={()=>setReceiver(item)}
             >
               {/* Profile Image */}
               <img
