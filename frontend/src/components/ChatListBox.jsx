@@ -11,9 +11,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import NewUserAndGroupSearchBox from "./NewUserAndGroupSearchBox";
 import CreateNewGroupBox from "./CreateNewGroupBox";
+import useFetchChatList from '../hooks/chatListHook';
 
 const ChatListBox = () => {
-  const { theme, width, chatList, setChatList } = useContext(userContext);
+  const chatList = useFetchChatList();
+  const { theme, width} = useContext(userContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [plusOptions, setPlusOptions] = useState(false);
   const dropdownRef = useRef(null); 

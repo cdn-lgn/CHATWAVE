@@ -51,47 +51,58 @@ app.use("/api/chat", chatRoute);
 const onlineUsers = new Map();
 
 io.use(ioAuthMiddleware);
-
 io.on("connection", (socket) => {
   try {
-    const { _id, name, profileImage } = socket.user;
+    const { _id, name, profileImage } = socket.user; 
     console.log("User Connected:", name);
+    
     onlineUsers.set(_id, { socketId: socket.id, name, profileImage });
 
     socket.on("send_message", async (data) => {
       try {
         const { senderID, receiverID, content, isGroupChat } = data;
+
         const chat = isGroupChat
           ? await createOrFindGroupChat(senderID, receiverID, content)
           : await createOrFindPrivateChat(senderID, receiverID, content);
-        const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
 
+        // Get receiver's socket ID
+        const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+        
         const messageData = {
           senderID,
           content,
           chat,
         };
+
+        // If receiver is online, send the message to them
         if (receiverSocketId) {
           io.to(receiverSocketId).emit("receive_message", messageData);
         }
+        
+        // Optionally, you can also send a confirmation message back to the sender
         socket.emit("receive_message", messageData);
+        
       } catch (err) {
         console.error("Error in send_message event:", err.message);
       }
     });
 
+    // Handle user disconnect
     socket.on("disconnect", () => {
       try {
-        onlineUsers.delete(_id);
+        onlineUsers.delete(_id); // Remove the user from the online users map
         console.log(`User with ID ${_id} disconnected.`);
       } catch (err) {
         console.error("Error in disconnect event:", err.message);
       }
     });
+
   } catch (err) {
     console.error("Error during socket connection:", err.message);
   }
 });
+
 
 // Server Listening
 const PORT = 3000;

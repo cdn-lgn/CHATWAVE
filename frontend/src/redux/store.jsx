@@ -1,7 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
+import storage from "redux-persist/lib/storage";
 import authUserReducer from "./authUserSlice";
+import chatListReducer from "./chatListSlice";
+import messagesReducer from "./messageSlice";
+
 
 // Configuration for Redux Persist
 const persistConfig = {
@@ -30,7 +33,9 @@ const clearStoreMiddleware = store => next => action => {
 
 
 const store = configureStore({
-    reducer: { user: persistedReducer },
+    reducer: { user: persistedReducer,
+    chatList: chatListReducer,
+    messages: messagesReducer,},
     middleware: (getDefaultMiddleware) => 
         getDefaultMiddleware().concat(clearStoreMiddleware)
 });
@@ -39,3 +44,6 @@ const store = configureStore({
 const persistor = persistStore(store);
 
 export { store, persistor };
+
+
+

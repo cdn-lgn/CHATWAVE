@@ -9,6 +9,9 @@ import Settings from "./pages/Settings";
 import { SocketProvider } from "./context/socketContext";
 
 const App = () => {
+
+  
+
   return (
     <Router>
       <Routes>

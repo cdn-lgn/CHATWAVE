@@ -1,43 +1,40 @@
 import React, { createContext, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
+import { addMessageToChat } from '../redux/messageSlice';
 
 export const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
-	const socket = useRef(null);
-	const user = useSelector((state) => state.user.user);
+    const socket = useRef(null);
+    const user = useSelector((state) => state.user.user);
+    const dispatch = useDispatch();
 
-	useEffect(() => {
-		if (user) {
-			socket.current = io("http://localhost:3000", {
-				transport: ["websocket"],
-				withCredentials: true
-			});
+    useEffect(() => {
+        if (user) {
+            socket.current = io("http://localhost:3000", {
+                transport: ["websocket"],
+                withCredentials: true,
+            });
 
-			socket.current.on("connect", () => {
-				console.log("Socket connected:", socket.current.id);
-			});
+            socket.current.on("connect", () => {
+                console.log("Socket connected:", socket.current.id);
+            });
 
-			socket.current.on("receive_message", (message) => {
-				// console.log("New message received:", message);
-			});
+            socket.current.on("receive_message", (message) => {
+                dispatch(addMessageToChat(message)); // Update Redux
+            });
 
-			// Handle any socket error
-			socket.current.on("connect_error", (err) => {
-				console.error("Socket connection error:", err);
-			});
-		}
+            socket.current.on("connect_error", (err) => {
+                console.error("Socket connection error:", err);
+            });
+        }
 
-		return () => {
-			socket.current.disconnect();
-			console.log("Socket disconnected");
-		};
-	}, [user]);
+        return () => {
+            socket.current.disconnect();
+            console.log("Socket disconnected");
+        };
+    }, [user, dispatch]);
 
-	return (
-		<SocketContext.Provider value={socket}>
-			{children}
-		</SocketContext.Provider>
-	);
+    return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 };
