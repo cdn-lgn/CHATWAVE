@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { userContext } from "../context/userContext";
 import { SocketContext } from "../context/socketContext";
@@ -9,28 +9,43 @@ import { faEllipsisV, faPhone } from "@fortawesome/free-solid-svg-icons";
 
 const ConversationBox = () => {
     const { theme, receiver, width } = useContext(userContext);
-    const user = useSelector((state) => state.user.user); // Fetch user details
-    let messages = useFetchMessagesHook(receiver?._id); // Fetch messages for the selected receiver
+    const user = useSelector((state) => state.user.user);
+
+    // Fetch messages safely from Redux
+    const messages = useFetchMessagesHook() || []; // Default to an empty array if no messages are found
+
     const socket = useContext(SocketContext).current;
 
     const [newMessage, setNewMessage] = useState("");
 
     const sendMessage = (e) => {
         e.preventDefault();
-        console.log(newMessage)
         if (newMessage.trim() && receiver) {
-            socket.emit("send_message", {
-              isGroupChat: receiver.entityType==="group" ? true : false,
-                receiverID: receiver._id,
-                senderID: user._id,
-                content:{
-                  type:"text",
-                  message:newMessage
-                }
-            });
+            const chatID = receiver.chatID;
+            const isGroupChat = receiver.entityType === "group";
+
+            if (socket) {
+                socket.emit("send_message", {
+                    senderID: user._id,
+                    chatID: chatID || null,
+                    receiverID: receiver?.participantID || receiver._id,
+                    groupID: receiver?.groupID || null,
+                    content: {
+                        type: "text",
+                        message: newMessage,
+                    },
+                    isGroupChat,
+                });
+            }
+
             setNewMessage(""); // Clear input after sending
         }
     };
+
+    // Log messages when they change (useEffect to track changes)
+    useEffect(() => {
+        // console.log(messages);
+    }, [messages]); // Run only when messages change
 
     return (
         <div
@@ -72,9 +87,14 @@ const ConversationBox = () => {
 
                     {/* Message Area */}
                     <div className="flex-grow p-4 overflow-y-auto">
-                        {messages.map((message, idx) => (
-                            <MessageBox key={idx} message={message} theme={theme} />
-                        ))}
+                        {/* Render messages only if they exist */}
+                        {Array.isArray(messages) && messages.length > 0 ? (
+                            messages.map((message, idx) => (
+                                <MessageBox key={idx} message={message} theme={theme} />
+                            ))
+                        ) : (
+                            <p>No messages yet.</p>
+                        )}
                     </div>
 
                     {/* Input Area */}

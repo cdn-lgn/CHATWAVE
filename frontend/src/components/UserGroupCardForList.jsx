@@ -1,10 +1,19 @@
-import React from "react";
+import React,{useContext} from "react";
+import { userContext } from '../context/userContext';
 
 const UserGroupCardForList = ({userOrGroup, theme }) => {
+
+  const {receiver,setReceiver} = useContext(userContext)
+
+const clickHandler =()=>{
+  console.log(userOrGroup)
+  setReceiver(userOrGroup)
+}
   return (
     <div
       className="flex items-center gap-4 w-full rounded-lg cursor-pointer"
       style={{background:theme.secondry}}
+      onClick={clickHandler}
     >
       {/* Profile Image */}
       <img

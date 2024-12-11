@@ -22,7 +22,8 @@ export const SocketProvider = ({ children }) => {
             });
 
             socket.current.on("receive_message", (message) => {
-                dispatch(addMessageToChat(message)); // Update Redux
+                dispatch(addMessageToChat(message)); 
+                console.log(message)
             });
 
             socket.current.on("connect_error", (err) => {

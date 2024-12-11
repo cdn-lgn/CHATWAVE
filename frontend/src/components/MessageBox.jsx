@@ -3,10 +3,10 @@ import { useSelector } from "react-redux";
 
 const MessageBox = React.memo(({ message, theme }) => {
   const user = useSelector((state) => state.user.user);
-  const isUser  = message?.senderID === user._id;
+  const isUser  = message?.chat?.participantID !== user._id;
 
-  console.log("Current User ID:", user._id);
-  console.log("Message Sender ID:", message.senderID);
+  // console.log("Current User ID:", user._id);
+  // console.log("Message Sender ID:", message);
 
   return (
     <div
@@ -14,7 +14,7 @@ const MessageBox = React.memo(({ message, theme }) => {
     >
       {!isUser  && (
         <img
-          src="https://via.placeholder.com/30"
+          src={message.chat.profileImage}
           alt="Friend Avatar"
           className="w-8 h-8 rounded-full mr-2"
         />

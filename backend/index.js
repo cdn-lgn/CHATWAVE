@@ -8,6 +8,7 @@ import userAuthRoute from "./routes/userRoutes.js";
 import searchRoute from "./routes/searchRoute.js";
 import groupRoute from "./routes/groupRoute.js";
 import chatRoute from "./routes/chatRoute.js";
+import messageRoute from "./routes/messageRoute.js";
 import { Server } from "socket.io";
 import { ioAuthMiddleware } from "./middleware/ioAuthMiddleware.js";
 import { createOrFindGroupChat, createOrFindPrivateChat } from "./controllers/chatController.js";
@@ -47,6 +48,7 @@ app.use("/api/user", userAuthRoute);
 app.use("/api/group", groupRoute);
 app.use("/api/search", searchRoute);
 app.use("/api/chat", chatRoute);
+app.use("/api/message", messageRoute);
 
 const onlineUsers = new Map();
 
@@ -55,38 +57,47 @@ io.on("connection", (socket) => {
   try {
     const { _id, name, profileImage } = socket.user; 
     console.log("User Connected:", name);
-    
-    onlineUsers.set(_id, { socketId: socket.id, name, profileImage });
 
-    socket.on("send_message", async (data) => {
-      try {
-        const { senderID, receiverID, content, isGroupChat } = data;
+    onlineUsers.set(_id.toString(), { socketId: socket.id, name, profileImage });
 
-        const chat = isGroupChat
-          ? await createOrFindGroupChat(senderID, receiverID, content)
-          : await createOrFindPrivateChat(senderID, receiverID, content);
-
-        // Get receiver's socket ID
-        const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-        
-        const messageData = {
-          senderID,
-          content,
-          chat,
-        };
-
-        // If receiver is online, send the message to them
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit("receive_message", messageData);
+   socket.on("send_message", async (data) => {
+    try {
+    console.log(data);
+    const {chatID,receiverID,senderID,content,groupID,isGroupChat} = data
+        let chat;
+        if (isGroupChat) {
+          if(chatID){
+            chat = await createOrFindGroupChat({senderID, groupID,chatID, content});
+          }else{
+            chat = await createOrFindGroupChat({senderID, receiverID, content});
+          }
+        } else {
+            if(chatID){
+            chat = await createOrFindPrivateChat({senderID, receiverID,chatID, content});
+          }else{
+            chat = await createOrFindPrivateChat({senderID, receiverID, content});
+          }
         }
-        
-        // Optionally, you can also send a confirmation message back to the sender
+
+        const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+
+        const messageData = {
+            senderID,
+            content,
+            chat,
+        };
+    
+
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("receive_message", messageData);
+        }
         socket.emit("receive_message", messageData);
-        
-      } catch (err) {
+
+    } catch (err) {
         console.error("Error in send_message event:", err.message);
-      }
-    });
+    }
+});
+
 
     // Handle user disconnect
     socket.on("disconnect", () => {

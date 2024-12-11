@@ -1,36 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setMessages, resetMessages } from "../redux/messageSlice";
+import { userContext } from '../context/userContext';
 
 const fetchMessagesUrl = `${import.meta.env.VITE_USER_API}/message/fetchChatMessages`;
 
-const  EMPTY_ARRAY = []
+const EMPTY_ARRAY = []
 
-const useFetchMessagesHook = (chatId) => {
+const useFetchMessagesHook = () => {
     const dispatch = useDispatch();
-    const messages = useSelector((state) => state.messages.messages[chatId] || EMPTY_ARRAY);
+    const { receiver } = useContext(userContext);
+    const messages = useSelector((state) => state.messages.messages[receiver?.chatID] || EMPTY_ARRAY);
 
     const fetchMessages = async () => {
-        try {
-            const response = await axios.get(`${fetchMessagesUrl}/${chatId}`, { withCredentials: true });
-            console.log(response.data);
+        if (!receiver || !receiver.chatID) return;
 
-            dispatch(setMessages({ chatId, messages: response.data.messages }));
+        try {
+            const chatID = receiver.chatID; // Access _id only if receiver is valid
+            const response = await axios.get(`${fetchMessagesUrl}/${chatID}`, { withCredentials: true });
+            dispatch(setMessages({ chatID, messages: response.data.messages }));
         } catch (error) {
             console.error("Error fetching messages:", error.message);
         }
     };
+
     useEffect(() => {
-        if (chatId) {
+        if (receiver && receiver.chatID) {
             fetchMessages();
         }
         return () => {
-            dispatch(resetMessages({ chatId }));
+            // Optional: If you want to reset messages when receiver changes
+            if (receiver && receiver.chatID) {
+                dispatch(resetMessages({ chatID: receiver.chatID }));
+            }
         };
-    }, [chatId]);
-
-    return messages;
+    }, []);
+    return messages; // Return messages
 };
 
 export default useFetchMessagesHook;

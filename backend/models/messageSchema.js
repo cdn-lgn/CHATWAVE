@@ -20,7 +20,7 @@ const messageSchema = new mongoose.Schema(
     type: {
       type: String, 
       required: true, 
-      enum: ["text", "image", "video", "file"], // Optional: restrict message types
+      enum: ["text", "image", "video", "file"],
     },
     message: { 
       type: String, 
