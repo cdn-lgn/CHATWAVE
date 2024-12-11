@@ -19,14 +19,13 @@ const chatSchema = new mongoose.Schema(
       default: null,
     },
     lastMessage: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message", // Store the last message for quick access
-      default: null,
+      type: { type: String, default: null },
+      message: { type: String, default: null },
     },
   },
   {
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
-  }
+  },
 );
 
 export default mongoose.model("Chat", chatSchema);

@@ -9,7 +9,7 @@ import ImageBox from "./ImageBox";
 import VoiceNoteBox from "./VoiceNoteBox";
 
 const ConversationBox = () => {
-  const { theme, width, receiver,chatList } = useContext(userContext); // Get theme context
+  const { theme, width, receiver,chatList,setChatList } = useContext(userContext); // Get theme context
   const socket = useContext(SocketContext).current;
   const user = useSelector((state) => state.user.user);
 
@@ -18,12 +18,13 @@ const ConversationBox = () => {
 
 const ChatExist = (chatList, receiver, user) => {
   return chatList.some((chat) => {
-    if (chat.isGroupChat) {
-      return chat.group && chat.group._id === receiver._id;
+    console.log(chat)
+    if (chat?.isGroupChat) {
+      return chat.group && chat?.group?._id === receiver._id;
     } else {
       return (
-        chat.participants.includes(user._id) &&
-        chat.participants.includes(receiver._id)
+        chat?.participants?.includes(user._id) &&
+        chat?.participants?.includes(receiver._id)
       );
     }
   });
@@ -67,6 +68,7 @@ const sendMessage = (e) => {
 
   if (newMessage.trim() && socket) {
     socket.emit("send_message", {
+      isGroupChat: receiver?.entityType==="group" || false,
       senderID: user._id,
       receiverID: receiver._id,
       content: {
@@ -76,14 +78,14 @@ const sendMessage = (e) => {
       doesChatExist,
     });
     setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        senderID: user._id,
-        content: {
-          type: "text",
-          message: newMessage,
-        },
-      },
+    //   ...prevMessages,
+    //   {
+    //     senderID: user._id,
+    //     content: {
+    //       type: "text",
+    //       message: newMessage,
+    //     },
+    //   },
     ]);
     setNewMessage("");
   } else {

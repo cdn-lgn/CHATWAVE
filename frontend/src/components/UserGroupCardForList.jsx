@@ -28,7 +28,7 @@ const UserGroupCardForList = ({userOrGroup, theme }) => {
           className="text-sm whitespace-nowrap overflow-hidden text-ellipsis"
           style={{ color: theme.text }}
         >
-          {userOrGroup?.lastMessage}
+          {userOrGroup?.lastMessage?.message}
         </p>
       </div>
     </div>
