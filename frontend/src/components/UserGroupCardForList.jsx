@@ -1,6 +1,8 @@
 import React,{useContext} from "react";
 import { userContext } from '../context/userContext';
 import useFetchMessagesHook from '../hooks/useFetchMessagesHook';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 const UserGroupCardForList = ({userOrGroup, theme }) => {
 
@@ -28,9 +30,6 @@ const clickHandler =()=>{
           <h5 className="font-medium" style={{ color: theme.text }}>
             {userOrGroup?.participant?.name}
           </h5>
-          <p className="text-[12px]" style={{ color: theme.mutedText }}>
-            {userOrGroup?.time}
-          </p>
         </div>
 
         <p
@@ -40,6 +39,10 @@ const clickHandler =()=>{
           {userOrGroup?.lastMessage?.message}
         </p>
       </div>
+      {(userOrGroup?.participant?.status === "online" || userOrGroup?.participant?.status === "typing...") && (
+  <FontAwesomeIcon icon={faCircle} className="text-green-600 text-xs" />
+)}
+
     </div>
   );
 };

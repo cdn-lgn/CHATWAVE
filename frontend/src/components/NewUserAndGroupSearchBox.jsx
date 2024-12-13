@@ -112,7 +112,7 @@ const NewUserAndGroupSearchBox = () => {
             </div>
           ))
         ) : (
-          <p style={{ color: theme.mutedText }}>enter name and search</p> //press enter
+          <p style={{ color: theme.mutedText }}>enter name and search</p>
         )}
       </div>
     </div>

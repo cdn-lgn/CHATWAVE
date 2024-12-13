@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import http from "http"; // Missing import
 import connectDB from "./config/db.js";
 import userAuthRoute from "./routes/userRoutes.js";
+import userStatusRoute from "./routes/userStatusRoute.js";
 import searchRoute from "./routes/searchRoute.js";
 import groupRoute from "./routes/groupRoute.js";
 import chatRoute from "./routes/chatRoute.js";
@@ -13,6 +14,7 @@ import { Server } from "socket.io";
 import { ioAuthMiddleware } from "./middleware/ioAuthMiddleware.js";
 import { createChat,updateChat } from "./controllers/chatController.js";
 import { createMessage } from "./controllers/messageController.js";
+import User from "./models/userSchema.js"
 
 dotenv.config();
 
@@ -46,6 +48,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Routes
 app.use("/api/user", userAuthRoute);
+app.use("/api/userStatus", userStatusRoute);
 app.use("/api/group", groupRoute);
 app.use("/api/search", searchRoute);
 app.use("/api/chat", chatRoute);
@@ -54,31 +57,34 @@ app.use("/api/message", messageRoute);
 const onlineUsers = new Map();
 
 io.use(ioAuthMiddleware);
-io.on("connection", (socket) => {
+io.on("connection", async(socket) => {
     try {
-        const { _id, name, profileImage } = socket.user;
-        console.log("User Connected:", name);
-
-        onlineUsers.set(_id.toString(), {
+        const userID = socket.user?._id.toString(); // Access the authenticated user
+        await User.findByIdAndUpdate(userID,{status:"online"})
+        if (!userID) {
+            console.log("User ID not available");
+            return;
+        }
+        console.log("User connected:", userID);
+        onlineUsers.set(userID, {
             socketId: socket.id,
-            name,
-            profileImage,
+            status: "online",
+            userID
+        });
+
+        io.emit("user_status_change", { userID, status: "online" });
+
+        socket.on('user_typing_status', (data) => {
+            console.log("Typing status:", onlineUsers.get(data.receiverID));
+            const receiverSocketId = onlineUsers.get(data.receiverID)?.socketId;
+            socket.to(receiverSocketId).emit('user_typing_status', data);
         });
 
         socket.on("send_message", async (data) => {
-            const {
-                senderID,
-                receiverID,
-                chatID,
-                content,
-                isGroupChat,
-                groupID,
-                isGroupMessage
-            } = data;
-            console.log(data)
+            const { senderID, receiverID, chatID, content, isGroupChat, groupID, isGroupMessage } = data;
+            console.log(data);
             try {
-                let chatObj;
-                chatObj = await updateChat({
+                let chatObj = await updateChat({
                     senderID,
                     receiverID,
                     isGroupChat,
@@ -86,36 +92,40 @@ io.on("connection", (socket) => {
                     chatID,
                     content,
                 });
-                // console.log(chatObj)
-               
+
                 const messageObj = await createMessage({
-    chatID,
-    senderID,
-    receiverID,
-    isGroupMessage,
-    groupID,
-    content,
-});
+                    chatID,
+                    senderID,
+                    receiverID,
+                    isGroupMessage,
+                    groupID,
+                    content,
+                });
 
                 const incomingData = { chatObj, messageObj };
-                console.log("receive_id ===> ",receiverID)
                 const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-                // console.log(receiverSocketId)
+
                 if (receiverSocketId) {
-                    io.to(receiverSocketId).emit(
-                        "receive_message",
-                        incomingData,
-                    );
+                    io.to(receiverSocketId).emit("receive_message", incomingData);
                 }
+
                 socket.emit("receive_message", incomingData);
             } catch (err) {
                 console.error("Error in send_message event:", err.message);
             }
         });
 
-        socket.on("disconnect", () => {
-            onlineUsers.delete(_id);
-            console.log(`User with ID ${_id} disconnected.`);
+        socket.on("disconnect", async() => {
+            if (userID) {
+                onlineUsers.delete(userID);
+                io.emit("user_status_change", { userID, status: "offline" });
+                try {
+                    await User.findByIdAndUpdate(userID, { status: Date.now() });
+                } catch (err) {
+                    console.error("Error updating user status on disconnect:", err.message);
+                }
+                console.log(`User with ID ${userID} disconnected.`);
+            }
         });
     } catch (err) {
         console.error("Error during socket connection:", err.message);

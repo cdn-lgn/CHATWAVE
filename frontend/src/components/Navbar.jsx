@@ -48,11 +48,11 @@ const Navbar = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            <FontAwesomeIcon
+            {/*<FontAwesomeIcon
               icon={faBell}
               className="text-xl mt-2 cursor-pointer transition-all duration-300"
               style={{ color: theme.primary }}
-            />
+            />*/}
           </div>
 
           {/* Message and Phone Icons */}
@@ -68,7 +68,7 @@ const Navbar = () => {
               onClick={() => setMiddleComponent("chatList")}
             />
 
-            {user?.userCreatedGroups !=false && (
+            {/*{user?.userCreatedGroups !=false && (
               <FontAwesomeIcon
                 icon={faUsersGear}
                 className="text-xl cursor-pointer p-3 rounded-full transition-all duration-300"
@@ -79,7 +79,7 @@ const Navbar = () => {
                 }
                 onClick={() => setMiddleComponent("groupList")}
               />
-            )}
+            )}*/}
 
             <FontAwesomeIcon
               icon={faPhone}
@@ -127,11 +127,11 @@ const Navbar = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <FontAwesomeIcon
+          {/*<FontAwesomeIcon
             icon={faBell}
             className="text-xl mt-2 cursor-pointer"
             style={{ color: theme.primary }}
-          />
+          />*/}
         </div>
       </div>
     );
@@ -177,7 +177,7 @@ const BottomBarForMobile = () => {
             }
             onClick={() => setMiddleComponent("chatList")}
           />
-          {user?.userCreatedGroups && (
+          {/*{user?.userCreatedGroups && (
             <FontAwesomeIcon
               icon={faUsersGear}
               className="text-xl cursor-pointer py-3 px-6 rounded-full transition-all duration-300"
@@ -188,7 +188,7 @@ const BottomBarForMobile = () => {
               }
               onClick={() => setMiddleComponent("groupList")}
             />
-          )}
+          )}*/}
 
           <FontAwesomeIcon
             icon={faPhone}
@@ -203,7 +203,7 @@ const BottomBarForMobile = () => {
 
           <FontAwesomeIcon
             icon={faGear}
-            className="text-xl mb-2 cursor-pointer"
+            className="text-xl cursor-pointer py-3 px-6 rounded-full transition-all duration-300"
             style={{ color: theme.primary }}
             onClick={settingsHandler}
           />

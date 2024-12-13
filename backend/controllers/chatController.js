@@ -1,22 +1,52 @@
 import Chat from "../models/chatSchema.js";
+import moment from 'moment';
 
 export const fetchAllChats = async (req, res) => {
     try {
         const userID = req.user.id;
         const allChats = await Chat.find({ participants: userID })
-            .populate("participants", "_id name profileImage")
+            .populate("participants", "_id name profileImage status")
             .populate("group", "_id name profileImage")
             .exec();
 
         const transformedChats = allChats.map((chat) => {
-            // console.log(userID)
-            // console.log(chat.participants)
-            // console.log(chat.participants[0]._id==userID)
-            // console.log(chat.participants[1]._id==userID)
+            const participant = chat.isGroupChat
+                ? null
+                : chat.participants.find((p) => p._id.toString() !== userID);
+
+            let participantStatus = 'offline';
+
+            if (participant && participant.status) {
+                if (participant.status === 'online') {
+                    participantStatus = 'online';
+                } else if (participant.status === 'offline') {
+                    participantStatus = 'offline';
+                } else {
+                    const statusTimestamp = parseInt(participant.status, 10);
+
+                    if (!isNaN(statusTimestamp)) {
+                        const lastActiveTime = moment(statusTimestamp);
+                        const minutesAgo = moment().diff(lastActiveTime, 'minutes');
+                        const hoursAgo = moment().diff(lastActiveTime, 'hours');
+                        const daysAgo = moment().diff(lastActiveTime, 'days');
+
+                        if (minutesAgo < 60) {
+                            participantStatus = `${minutesAgo} minute(s) ago`;
+                        } else if (hoursAgo < 24) {
+                            participantStatus = `${hoursAgo} hour(s) ago`;
+                        } else {
+                            participantStatus = lastActiveTime.format('MMMM Do YYYY'); // Date without time
+                        }
+                    } else {
+                        participantStatus = 'offline';  // Default to offline if parsing fails
+                    }
+                }
+            }
+
             if (chat.isGroupChat) {
                 return {
-                    _id:chat._id,
-                    chatID:chat._id,
+                    _id: chat._id,
+                    chatID: chat._id,
                     isGroupChat: true,
                     group: {
                         groupID: chat.group._id,
@@ -27,16 +57,20 @@ export const fetchAllChats = async (req, res) => {
                 };
             } else {
                 return {
-                    _id:chat._id,
-                    chatID:chat._id,
+                    _id: chat._id,
+                    chatID: chat._id,
                     isGroupChat: false,
-                    participant: chat.participants.find(
-                        (participant) => participant._id != userID,
-                    ),
+                    participant: {
+                        _id: participant?._id,
+                        name: participant?.name,
+                        profileImage: participant?.profileImage,
+                        status: participantStatus
+                    },
                     lastMessage: chat.lastMessage,
                 };
             }
         });
+
         res.status(200).json({
             message: "success",
             success: true,
@@ -50,6 +84,10 @@ export const fetchAllChats = async (req, res) => {
         });
     }
 };
+
+
+
+
 
 export const createChat = async (req, res) => {
     try {
@@ -145,7 +183,7 @@ export const updateChat = async ({
             { new: true }
         ).populate(
             isGroupChat ? "group" : "participants",
-            "_id name profileImage"
+            "_id name profileImage status"
         );
 
         if (!updatedChat) {

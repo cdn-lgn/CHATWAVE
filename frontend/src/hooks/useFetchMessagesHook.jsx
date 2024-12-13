@@ -31,7 +31,7 @@ const useFetchMessagesHook = () => {
         }
     }, [receiver]);
 
-    return true; // Return cached messages
+    return ; // Return cached messages
 };
 
 export default useFetchMessagesHook;

@@ -128,7 +128,8 @@ const ChatListBox = () => {
               />
               <span>New Chat</span>
             </div>
-            <div
+            {/*goup functionality stopped for now*/}
+            {/*<div
               className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
               onClick={() => setNewGroupTab(true)}
             >
@@ -138,7 +139,7 @@ const ChatListBox = () => {
                 style={{ color: theme.text }}
               />
               <span>Create Group</span>
-            </div>
+            </div>*/}
           </div>
         )}
         <FontAwesomeIcon

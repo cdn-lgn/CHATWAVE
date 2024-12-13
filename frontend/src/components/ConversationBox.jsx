@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { userContext } from "../context/userContext";
@@ -15,6 +15,7 @@ const createChatUrl = `${import.meta.env.VITE_USER_API}/chat/createChat`;
 const ConversationBox = () => {
     const { theme, receiver, width, setReceiver } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
+    const chatUser = useSelector((state)=>state.chatList?.chatList[receiver?.chatID])
     const messages = useSelector(
         (state) => state.messages?.messages[receiver?.chatID],
     );
@@ -24,7 +25,25 @@ const ConversationBox = () => {
     const socket = useContext(SocketContext).current;
 
     const [newMessage, setNewMessage] = useState("");
+    const typingTimeout = useRef(null)
+    const handleTyping = (e) =>{
+        // e.preventDefault()
+        setNewMessage(e.target.value)
+        if(receiver?.chatID){
+            socket.emit("user_typing_status",{chatID:receiver?.chatID,receiverID:receiver?.participant._id,status:"typing..."})
+
+            clearTimeout(typingTimeout.current)
+
+        typingTimeout.current =  setTimeout(()=>{
+            socket.emit("user_typing_status",{chatID:receiver?.chatID,receiverID:receiver?.participant._id,status:"online"})
+        },500)
+        }
+    }
+
     let isRequestPending = false;
+
+    const messageEndRef = useRef(null);
+
     const sendMessage = async (e) => {
         e.preventDefault();
 
@@ -78,6 +97,7 @@ const ConversationBox = () => {
                     groupID: receiver?.group?._id || receiver?._id,
                 });
             }
+            setNewMessage("")
         } catch (error) {
             console.error("Error creating chat:", error);
         } finally {
@@ -85,10 +105,17 @@ const ConversationBox = () => {
         }
     };
 
-    // Log messages when they change (useEffect to track changes)
+useEffect(() => {
+    return () => {
+        clearTimeout(typingTimeout.current)
+    };
+}, [])
     useEffect(() => {
-        // console.log(messages);
-    }, [messages]); // Run only when messages change
+        messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+    useEffect(() => {
+        // console.log(chatUser)
+    }, [chatUser])
 
     return (
         <div
@@ -107,8 +134,8 @@ const ConversationBox = () => {
                     >
                         <div className="flex items-center">
                             <img
-                                src={
-                                    receiver?.participant?.profileImage ||
+                                src={chatUser ?
+                                    chatUser.participant?.profileImage :
                                     receiver?.profileImage
                                 }
                                 alt="Friend Avatar"
@@ -116,14 +143,15 @@ const ConversationBox = () => {
                             />
                             <div>
                                 <h4 className="font-bold">
-                                    {receiver?.participant?.name ||
+                                    {chatUser?
+                                        chatUser?.participant?.name :
                                         receiver?.name}
                                 </h4>
                                 <p
-                                    className="text-sm"
-                                    style={{ color: theme.mutedText }}
+                                    className="text-sm text-green-700"
+                                    // style={{ color: theme.primary }}
                                 >
-                                    Online
+                                    {chatUser && chatUser?.participant?.status}
                                 </p>
                             </div>
                         </div>
@@ -158,6 +186,9 @@ const ConversationBox = () => {
                                 <p>No message yet</p>
                             </div>
                         )}
+
+                        {/* This ref will be used to scroll to the bottom */}
+                        <div ref={messageEndRef}></div>
                     </div>
 
                     {/* Input Area */}
@@ -171,7 +202,7 @@ const ConversationBox = () => {
                         <input
                             type="text"
                             value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
+                            onChange={(e)=>handleTyping(e)}
                             placeholder="Type a message..."
                             style={{
                                 backgroundColor: theme.inputBackground,

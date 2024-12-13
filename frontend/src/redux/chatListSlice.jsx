@@ -9,9 +9,9 @@ const chatListSlice = createSlice({
     initialState,
     reducers: {
         setChatList: (state, action) => {
-            const chatList = action.payload; 
+            const chatList = action.payload;
             chatList.forEach((chat) => {
-                state.chatList[chat?._id] = chat; 
+                state.chatList[chat?._id] = chat;
             });
         },
         resetChatList: (state) => {
@@ -20,15 +20,35 @@ const chatListSlice = createSlice({
         updateChat: (state, action) => {
             // console.log(action.payload)
             const { _id } = action.payload;
-            if(state.chatList[_id]){
-                state.chatList[_id].lastMessage=action.payload?.lastMessage
-            }else{
-            state.chatList[_id] = action.payload;
+            if (state.chatList[_id]) {
+                state.chatList[_id].lastMessage = action.payload?.lastMessage;
+            } else {
+                state.chatList[_id] = action.payload;
             }
         },
+        updateParticipantStatus: (state, action) => {
+            const { userID, status } = action.payload;
+            Object.keys(state.chatList).forEach((chatID) => {
+                const chat = state.chatList[chatID];
+                if (chat.participant._id === userID) {
+                    chat.participant.status = status;
+                }
+            });
+        },
+        updateParticipantTypingStatus:(state,action)=>{
+            // console.log(action.payload)
+            const {chatID,receiverID,status} = action.payload 
+            state.chatList[chatID].participant.status = status 
+        }
     },
 });
 
-export const { setChatList, resetChatList, updateChat } = chatListSlice.actions;
+export const {
+    setChatList,
+    resetChatList,
+    updateChat,
+    updateParticipantStatus,
+    updateParticipantTypingStatus,
+} = chatListSlice.actions;
 
 export default chatListSlice.reducer;
