@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
+import {useSelector} from "react-redux"
 import UserGroupCardForList from "./UserGroupCardForList";
 import { userContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,36 +15,54 @@ import CreateNewGroupBox from "./CreateNewGroupBox";
 import useFetchChatList from '../hooks/chatListHook';
 
 const ChatListBox = () => {
-  const chatList = useFetchChatList();
-  const { theme, width} = useContext(userContext);
+  useFetchChatList(); 
+  const chatList = useSelector(state=>state.chatList.chatList)
+  const { theme, width } = useContext(userContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [plusOptions, setPlusOptions] = useState(false);
-  const dropdownRef = useRef(null); 
+  const dropdownRef = useRef(null);
   const [newUserSearchTab, setNewUserSearchTab] = useState(false);
   const [newGroupTab, setNewGroupTab] = useState(false);
 
+  // Handle search term input
   const handleSearch = (e) => setSearchTerm(e.target.value);
 
+  // Toggle plus options
   const plusButtonHandler = () => {
     setPlusOptions((prev) => !prev);
   };
 
-const filteredChatList = Array.isArray(chatList) ? chatList.filter((chat) =>
-    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
-) : []
+  // Filter the chat list based on the search term
+  const filteredChatList = Object.values(chatList)?.filter(chat => chat?.participant?.name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
+
+  // Close the dropdown if clicked outside
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setPlusOptions(false);
     }
   };
 
+  // Add event listener for clicking outside the dropdown
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  
+// useEffect(() => {
+//     if (socket) {
+//         socket.current.on("receive_message", ({ chat }) => {
+//             if (!chatList[chat.chatID]) {
+//                 // If chat doesn't exist, add it
+//                 dispatch(setChatList([chat]));
+//             }
+//         });
+//     }
+// }, [socket, chatList, dispatch]);
+
+
 
   return (
     <div
@@ -153,7 +172,7 @@ const filteredChatList = Array.isArray(chatList) ? chatList.filter((chat) =>
         </>
       )}
 
-      {/*new group create tab*/}
+      {/* New Group Create Tab */}
       {newGroupTab && (
         <>
           <div

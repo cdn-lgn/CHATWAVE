@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  currentChatID: null, // Track the current selected chat
   messages: {}, // Store messages by `chatID`
 };
 
@@ -10,21 +9,25 @@ const messagesSlice = createSlice({
   initialState,
   reducers: {
     setMessages: (state, action) => {
-      const { chatID, content } = action.payload;
-      state.currentChatID = chatID;
-      state.messages[chatID] = {chat,content};
+      const { chatID, messages } = action.payload;
+      if (!state.messages[chatID]) {
+        state.messages[chatID] = [];
+      }
+      messages.forEach((message) => {
+        state.messages[chatID].push(message);
+      });
     },
+
     resetMessages: (state) => {
       state.messages = {};
       state.currentChatID = null;
     },
     addMessageToChat: (state, action) => {
       // console.log(action.payload)
-      const { chat, content } = action.payload;
-      if (!state.messages[chat.chatID]) {
-        state.messages[chat.chatID] = [];
+      if (!state.messages[action.payload?.chatID]) {
+        state.messages[action.payload?.chatID] = [];
       }
-      state.messages[chat.chatID].push({chat,content});
+      state.messages[action.payload?.chatID].push(action.payload);
     },
   },
 });

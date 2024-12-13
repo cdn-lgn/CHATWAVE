@@ -1,44 +1,87 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
 import { userContext } from "../context/userContext";
 import { SocketContext } from "../context/socketContext";
 import useFetchMessagesHook from "../hooks/useFetchMessagesHook";
 import MessageBox from "./MessageBox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV, faPhone } from "@fortawesome/free-solid-svg-icons";
+import { SpinnerLoader } from "./Loader";
+import { updateChat } from "../redux/chatListSlice";
+
+const createChatUrl = `${import.meta.env.VITE_USER_API}/chat/createChat`;
 
 const ConversationBox = () => {
-    const { theme, receiver, width } = useContext(userContext);
+    const { theme, receiver, width, setReceiver } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
-
-    // Fetch messages safely from Redux
-    const messages = useFetchMessagesHook() || []; // Default to an empty array if no messages are found
+    const messages = useSelector(
+        (state) => state.messages?.messages[receiver?.chatID],
+    );
+    const dispatch = useDispatch();
+    useFetchMessagesHook();
 
     const socket = useContext(SocketContext).current;
 
     const [newMessage, setNewMessage] = useState("");
-
-    const sendMessage = (e) => {
+    let isRequestPending = false;
+    const sendMessage = async (e) => {
         e.preventDefault();
-        if (newMessage.trim() && receiver) {
-            const chatID = receiver.chatID;
-            const isGroupChat = receiver.entityType === "group";
 
-            if (socket) {
+        if (isRequestPending) return;
+        isRequestPending = true;
+
+        let chatID = receiver?.chatID;
+        let createdChat;
+
+        try {
+            if (!chatID) {
+                const response = await axios.post(
+                    createChatUrl,
+                    {
+                        content: {
+                            type: "text",
+                            message: newMessage,
+                        },
+                        isGroupChat: receiver?.entityType === "group",
+                        groupID:
+                            receiver?.entityType === "group"
+                                ? receiver?._id
+                                : null,
+                        receiverID:
+                            receiver?.entityType === "group"
+                                ? null
+                                : receiver?._id,
+                    },
+                    { withCredentials: true },
+                );
+
+                createdChat = response.data?.chat;
+                chatID = createdChat?.chatID;
+
+                setReceiver(createdChat);
+                dispatch(updateChat(createdChat));
+            }
+
+            if (chatID) {
                 socket.emit("send_message", {
-                    senderID: user._id,
-                    chatID: chatID || null,
-                    receiverID: receiver?.participantID || receiver._id,
-                    groupID: receiver?.groupID || null,
+                    senderID: user?._id,
                     content: {
                         type: "text",
                         message: newMessage,
                     },
-                    isGroupChat,
+                    isGroupChat:
+                        receiver?.isGroupChat ||
+                        receiver.entityType === "group",
+                    chatID: chatID,
+                    receiverID: receiver?.participant?._id || receiver?._id,
+                    groupID: receiver?.group?._id || receiver?._id,
                 });
             }
-
-            setNewMessage(""); // Clear input after sending
+        } catch (error) {
+            console.error("Error creating chat:", error);
+        } finally {
+            isRequestPending = false;
         }
     };
 
@@ -64,13 +107,22 @@ const ConversationBox = () => {
                     >
                         <div className="flex items-center">
                             <img
-                                src={receiver.profileImage}
+                                src={
+                                    receiver?.participant?.profileImage ||
+                                    receiver?.profileImage
+                                }
                                 alt="Friend Avatar"
                                 className="w-10 h-10 rounded-full mr-4"
                             />
                             <div>
-                                <h4 className="font-bold">{receiver.name}</h4>
-                                <p className="text-sm" style={{ color: theme.mutedText }}>
+                                <h4 className="font-bold">
+                                    {receiver?.participant?.name ||
+                                        receiver?.name}
+                                </h4>
+                                <p
+                                    className="text-sm"
+                                    style={{ color: theme.mutedText }}
+                                >
                                     Online
                                 </p>
                             </div>
@@ -88,12 +140,23 @@ const ConversationBox = () => {
                     {/* Message Area */}
                     <div className="flex-grow p-4 overflow-y-auto">
                         {/* Render messages only if they exist */}
-                        {Array.isArray(messages) && messages.length > 0 ? (
+                        {messages && messages.length > 0 ? (
                             messages.map((message, idx) => (
-                                <MessageBox key={idx} message={message} theme={theme} />
+                                <MessageBox
+                                    key={idx}
+                                    receiver={receiver}
+                                    message={message}
+                                    theme={theme}
+                                />
                             ))
+                        ) : receiver?.chatID ? (
+                            <div className="flex w-full h-full items-center justify-center">
+                                <SpinnerLoader />
+                            </div>
                         ) : (
-                            <p>No messages yet.</p>
+                            <div className="flex w-full h-full items-center justify-center">
+                                <p>No message yet</p>
+                            </div>
                         )}
                     </div>
 
@@ -119,7 +182,10 @@ const ConversationBox = () => {
                         />
                         <button
                             onClick={sendMessage}
-                            style={{ backgroundColor: theme.button, color: "#FFFFFF" }}
+                            style={{
+                                backgroundColor: theme.button,
+                                color: "#FFFFFF",
+                            }}
                             className="px-4 py-2 rounded-lg"
                         >
                             Send

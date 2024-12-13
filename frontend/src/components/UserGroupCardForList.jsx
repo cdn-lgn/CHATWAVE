@@ -1,12 +1,12 @@
 import React,{useContext} from "react";
 import { userContext } from '../context/userContext';
+import useFetchMessagesHook from '../hooks/useFetchMessagesHook';
 
 const UserGroupCardForList = ({userOrGroup, theme }) => {
 
   const {receiver,setReceiver} = useContext(userContext)
 
 const clickHandler =()=>{
-  console.log(userOrGroup)
   setReceiver(userOrGroup)
 }
   return (
@@ -17,8 +17,8 @@ const clickHandler =()=>{
     >
       {/* Profile Image */}
       <img
-        src={userOrGroup?.profileImage}
-        alt={userOrGroup?.name}
+        src={userOrGroup?.participant?.profileImage}
+        alt={userOrGroup?.participant?.name}
         className="w-12 h-12 rounded-full object-cover"
       />
 
@@ -26,7 +26,7 @@ const clickHandler =()=>{
       <div className="flex-1 min-w-0 relative">
         <div className="flex items-center justify-between">
           <h5 className="font-medium" style={{ color: theme.text }}>
-            {userOrGroup?.name}
+            {userOrGroup?.participant?.name}
           </h5>
           <p className="text-[12px]" style={{ color: theme.mutedText }}>
             {userOrGroup?.time}

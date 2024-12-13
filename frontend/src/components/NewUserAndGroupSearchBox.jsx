@@ -30,7 +30,7 @@ const NewUserAndGroupSearchBox = () => {
   };
 
   const clickOnSearchResult = (item) => {
-    const foundChat = chatList.find((chat) => {
+    const foundChat = Object.values(chatList).find((chat) => {
         if (item.entityType === "group") {
             return item._id === chat.groupID;
         } else {

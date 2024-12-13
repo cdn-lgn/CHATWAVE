@@ -21,11 +21,11 @@ const App = () => {
           path="/"
           element={
             <ProtectedRoute>
-              <SocketProvider>
                 <WrapperComponentContext>
+              <SocketProvider>
                   <Home />
-                </WrapperComponentContext>
               </SocketProvider>
+                </WrapperComponentContext>
             </ProtectedRoute>
           }
         />
@@ -33,11 +33,11 @@ const App = () => {
           path="/settings"
           element={
             <ProtectedRoute>
-              <SocketProvider>
                 <WrapperComponentContext>
+              <SocketProvider>
                   <Settings />
-                </WrapperComponentContext>
               </SocketProvider>
+                </WrapperComponentContext>
             </ProtectedRoute>
           }
         />

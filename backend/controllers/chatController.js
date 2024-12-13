@@ -1,35 +1,42 @@
-import Chat from "../models/chatSchema.js"
+import Chat from "../models/chatSchema.js";
 
 export const fetchAllChats = async (req, res) => {
     try {
         const userID = req.user.id;
         const allChats = await Chat.find({ participants: userID })
-            .populate('participants', 'name profileImage') // Populate participants for personal chat
-            .populate('group', 'name profileImage') // Populate group for group chat
+            .populate("participants", "_id name profileImage")
+            .populate("group", "_id name profileImage")
             .exec();
-        const transformedChats = allChats.map(chat => {
+
+        const transformedChats = allChats.map((chat) => {
+            // console.log(userID)
+            // console.log(chat.participants)
+            // console.log(chat.participants[0]._id==userID)
+            // console.log(chat.participants[1]._id==userID)
             if (chat.isGroupChat) {
                 return {
+                    _id:chat._id,
+                    chatID:chat._id,
                     isGroupChat: true,
-                    groupID: chat.group?._id || null, // Group ID
-                    name: chat.group?.name || "Unnamed Group", // Group name
-                    profileImage: chat.group?.profileImage || null, // Group profile image
-                    chatID: chat._id,
-                    lastMessage: chat.lastMessage|| "No messages yet", // Last message
+                    group: {
+                        groupID: chat.group._id,
+                        profileImage: chat.group.profileImage,
+                        name: chat.group.name,
+                    },
+                    lastMessage: chat.lastMessage,
                 };
             } else {
-                const secondUser = chat.participants.find(participant => participant._id.toString() !== userID.toString());
                 return {
+                    _id:chat._id,
+                    chatID:chat._id,
                     isGroupChat: false,
-                    name: secondUser?.name || "Unknown User", // Name of the second participant
-                    participantID: secondUser?._id || null, // ID of the second participant
-                    chatID: chat._id,
-                    profileImage: secondUser?.profileImage || null, // Profile image of the second participant
-                    lastMessage: chat.lastMessage|| "No messages yet", // Last message
+                    participant: chat.participants.find(
+                        (participant) => participant._id != userID,
+                    ),
+                    lastMessage: chat.lastMessage,
                 };
             }
         });
-
         res.status(200).json({
             message: "success",
             success: true,
@@ -44,111 +51,130 @@ export const fetchAllChats = async (req, res) => {
     }
 };
 
-
-
-export const createOrFindGroupChat = async ({senderID, groupID, chatID, content}) => {
+export const createChat = async (req, res) => {
     try {
+        const senderID = req.user.id;
+        const { receiverID, groupID, content, isGroupChat } = req.body;
+
         let chat;
-        if (chatID) {
-            chat = await Chat.findByIdAndUpdate(
-                chatID,
-                { lastMessage: content },
-                { new: true }
-            )
-            .populate('participants', 'name profileImage')
-            .populate('group', 'name profileImage');
+        if (isGroupChat) {
+            chat = await Chat.findOne({
+                participants: senderID,
+                group: groupID,
+            }).populate("group", "_id name profileImage");
         } else {
-            chat = await Chat.findOneAndUpdate(
-                {
-                    participants: { $in: [senderID] },
-                    group: groupID,
-                    isGroupChat: true,
-                },
-                { lastMessage: content },
-                { new: true }
-            )
-            .populate('participants', 'name profileImage')
-            .populate('group', 'name profileImage');
-
-            if (!chat) {
-                const chatData = {
-                    isGroupChat: true,
-                    participants: [senderID],
-                    group: groupID,
-                    lastMessage: content,
-                };
-
-                chat = await Chat.create(chatData);
-                chat = await Chat.findById(chat._id)
-                    .populate('participants', 'name profileImage')
-                    .populate('group', 'name profileImage');
-            }
+            chat = await Chat.findOne({
+                participants: { $all: [senderID, receiverID] },
+            }).populate("participants", "_id name profileImage");
         }
-        return {
-            isGroup: true,
-            groupID: chat.group?._id || null,
-            name: chat.group?.name || "Unnamed Group",
-            profileImage: chat.group?.profileImage || null,
-            chatID: chat._id,
-            lastMessage: chat.lastMessage || "No messages yet",
-        };
-    } catch (err) {
-        console.error("Error in createOrFindGroupChat:", err.message);
-        throw new Error("Error in createOrFindGroupChat: " + err.message);
-    }
-};
 
-
-export const createOrFindPrivateChat = async ({senderID, receiverID, chatID, content}) => {
-    try {
-        let chat;
-        if (chatID) {
-            chat = await Chat.findByIdAndUpdate(
-                chatID,
-                { lastMessage: content },
-                { new: true }
-            )
-            .populate('participants', 'name profileImage');
-        } else {
-            chat = await Chat.findOneAndUpdate(
-                {
-                    participants: { $all: [senderID, receiverID] },
-                    isGroupChat: false,
-                },
-                { lastMessage: content },
-                { new: true }
-            )
-            .populate('participants', 'name profileImage');
-
-            if (!chat) {
-                const chatData = {
+        if (!chat) {
+            if (isGroupChat) {
+                chat = new Chat({
+                    isGroupChat: true,
+                    group: groupID,
+                    participants: [senderID],
+                    lastMessage: content,
+                });
+                await chat.save();
+                chat = await chat.populate("group", "_id name profileImage");
+            } else {
+                chat = new Chat({
                     isGroupChat: false,
                     participants: [senderID, receiverID],
                     lastMessage: content,
-                };
-
-                chat = await Chat.create(chatData);
-                chat = await Chat.findById(chat._id)
-                    .populate('participants', 'name profileImage');
+                });
+                await chat.save();
+                chat = await chat.populate(
+                    "participants",
+                    "_id name profileImage",
+                );
             }
         }
-        const secondUser = chat.participants.find(
-            participant => participant._id.toString() !== senderID.toString()
-        );
 
-        return {
-            isGroup: false,
-            name: secondUser?.name || "Unknown User",
-            participantID: secondUser?._id || null,
-            chatID: chat._id,
-            profileImage: secondUser?.profileImage || null,
-            lastMessage: chat.lastMessage || "No messages yet",
+        // Format the chat for response
+        const formattedChat = {
+            _id: chat._id,
+            chatID:chat._id,
+            isGroupChat: chat.isGroupChat,
+            lastMessage: chat.lastMessage,
+            ...(chat.isGroupChat
+                ? {
+                      group: {
+                          groupID: chat.group._id,
+                          profileImage: chat.group.profileImage,
+                          name: chat.group.name,
+                      },
+                  }
+                : {
+                      participant: chat.participants.find(
+                          (participant) =>
+                              participant._id.toString() !== senderID,
+                      ),
+                  }),
         };
-    } catch (err) {
-        console.error("Error in createOrFindPrivateChat:", err.message);
-        throw new Error("Error in createOrFindPrivateChat: " + err.message);
+        res.status(200).json({
+            message: "success",
+            success: true,
+            chat: formattedChat,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "failed",
+            success: false,
+        });
     }
 };
 
 
+
+export const updateChat = async ({
+    chatID,
+    senderID,
+    receiverID,
+    content,
+    isGroupChat=false,
+    groupID,
+}) => {
+    // console.log(chatID)
+    try {
+        const updatedChat = await Chat.findByIdAndUpdate(
+            chatID,
+            { lastMessage: content },
+            { new: true }
+        ).populate(
+            isGroupChat ? "group" : "participants",
+            "_id name profileImage"
+        );
+
+        if (!updatedChat) {
+            throw new Error("Chat not found");
+        }
+
+        const formattedChat = {
+            _id: updatedChat._id,
+            chatID:updatedChat._id,
+            isGroupChat: updatedChat.isGroupChat,
+            lastMessage: updatedChat.lastMessage,
+            ...(updatedChat.isGroupChat
+                ? {
+                      group: {
+                          groupID: updatedChat.group._id,
+                          profileImage: updatedChat.group.profileImage,
+                          name: updatedChat.group.name,
+                      },
+                  }
+                : {
+                      participant: updatedChat.participants.find(
+                          (participant) => participant._id.toString() === senderID
+                      ),
+                  }),
+        };
+        return formattedChat;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
 

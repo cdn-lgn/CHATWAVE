@@ -2,30 +2,32 @@ import mongoose from "mongoose";
 
 const chatSchema = new mongoose.Schema(
   {
-    isGroupChat: {
-      type: Boolean,
-      default: false, // False for peer-to-peer chats
-    },
+    isGroupChat: { type: Boolean, default: false },
     participants: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // References the user schema
+        ref: "User",
         required: true,
       },
     ],
     group: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Group", // References the group schema if it's a group chat
+      ref: "Group",
       default: null,
     },
     lastMessage: {
-      type: { type: String, default: null },
-      message: { type: String, default: null },
+      type: {
+        type: String,
+        default: "text",
+        required: true,
+      },
+      message: {
+        type: String,
+        default: null,
+      },
     },
   },
-  {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
-  },
+  { timestamps: true },
 );
 
 export default mongoose.model("Chat", chatSchema);
