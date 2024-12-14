@@ -12,9 +12,9 @@ import chatRoute from "./routes/chatRoute.js";
 import messageRoute from "./routes/messageRoute.js";
 import { Server } from "socket.io";
 import { ioAuthMiddleware } from "./middleware/ioAuthMiddleware.js";
-import { createChat,updateChat } from "./controllers/chatController.js";
+import { createChat, updateChat } from "./controllers/chatController.js";
 import { createMessage } from "./controllers/messageController.js";
-import User from "./models/userSchema.js"
+import User from "./models/userSchema.js";
 
 dotenv.config();
 
@@ -22,7 +22,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        origin: ["http://localhost:5173", "http://192.168.76.115:5173"],
         credentials: true,
     },
 });
@@ -33,7 +33,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
     cors({
-        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        // origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        origin: ["http://localhost:5173", "http://192.168.76.115:5173"],
         credentials: true,
     }),
 );
@@ -57,10 +58,10 @@ app.use("/api/message", messageRoute);
 const onlineUsers = new Map();
 
 io.use(ioAuthMiddleware);
-io.on("connection", async(socket) => {
+io.on("connection", async (socket) => {
     try {
         const userID = socket.user?._id.toString(); // Access the authenticated user
-        await User.findByIdAndUpdate(userID,{status:"online"})
+        await User.findByIdAndUpdate(userID, { status: "online" });
         if (!userID) {
             console.log("User ID not available");
             return;
@@ -69,19 +70,27 @@ io.on("connection", async(socket) => {
         onlineUsers.set(userID, {
             socketId: socket.id,
             status: "online",
-            userID
+            userID,
         });
 
         io.emit("user_status_change", { userID, status: "online" });
 
-        socket.on('user_typing_status', (data) => {
+        socket.on("user_typing_status", (data) => {
             console.log("Typing status:", onlineUsers.get(data.receiverID));
             const receiverSocketId = onlineUsers.get(data.receiverID)?.socketId;
-            socket.to(receiverSocketId).emit('user_typing_status', data);
+            socket.to(receiverSocketId).emit("user_typing_status", data);
         });
 
         socket.on("send_message", async (data) => {
-            const { senderID, receiverID, chatID, content, isGroupChat, groupID, isGroupMessage } = data;
+            const {
+                senderID,
+                receiverID,
+                chatID,
+                content,
+                isGroupChat,
+                groupID,
+                isGroupMessage,
+            } = data;
             console.log(data);
             try {
                 let chatObj = await updateChat({
@@ -106,7 +115,10 @@ io.on("connection", async(socket) => {
                 const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
 
                 if (receiverSocketId) {
-                    io.to(receiverSocketId).emit("receive_message", incomingData);
+                    io.to(receiverSocketId).emit(
+                        "receive_message",
+                        incomingData,
+                    );
                 }
 
                 socket.emit("receive_message", incomingData);
@@ -115,14 +127,71 @@ io.on("connection", async(socket) => {
             }
         });
 
-        socket.on("disconnect", async() => {
+        //=================//
+        // webRTC response start
+        //=================//
+        socket.on("offer", ({ offer, senderID, receiverID }) => {
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            console.log("Offer received from", socket.id);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit("incomingCall", {
+                    offer,
+                    senderID,
+                    receiverID,
+                });
+            } else {
+                console.log("Receiver not available");
+            }
+        });
+        socket.on("answer", ({ answer, senderID, receiverID }) => {
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            console.log("Answer received from", socket.id);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit("callAnswered", {
+                    answer,
+                    senderID,
+                    receiverID,
+                });
+            } else {
+                console.log("Caller not available");
+            }
+        });
+        socket.on("ice-candidate", ({ candidate, senderID, receiverID }) => {
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+
+            console.log("ICE candidate received:", candidate);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit("iceCandidate", {
+                    candidate,
+                    senderID,
+                    receiverID,
+                });
+            }
+        });
+        socket.on("endCall", (targetUserId) => {
+            const receiverSocketId = onlineUsers.get(targetUserId)?.socketId;
+            console.log("Call ended by user:", socket.id);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit("endCall", { from: socket.id });
+            }
+        });
+        //=================//
+        // webRTC response end
+        //=================//
+
+        socket.on("disconnect", async () => {
             if (userID) {
                 onlineUsers.delete(userID);
                 io.emit("user_status_change", { userID, status: "offline" });
                 try {
-                    await User.findByIdAndUpdate(userID, { status: Date.now() });
+                    await User.findByIdAndUpdate(userID, {
+                        status: Date.now(),
+                    });
                 } catch (err) {
-                    console.error("Error updating user status on disconnect:", err.message);
+                    console.error(
+                        "Error updating user status on disconnect:",
+                        err.message,
+                    );
                 }
                 console.log(`User with ID ${userID} disconnected.`);
             }
@@ -134,7 +203,7 @@ io.on("connection", async(socket) => {
 
 // Server Listening
 const PORT = 3000;
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
     console.log("Server started at port", PORT);
     connectDB();
 });

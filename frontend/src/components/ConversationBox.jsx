@@ -114,8 +114,8 @@ useEffect(() => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
     useEffect(() => {
-        // console.log(chatUser)
     }, [chatUser])
+
 
     return (
         <div

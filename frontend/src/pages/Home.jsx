@@ -17,6 +17,7 @@ const Home = () => {
   } = useContext(userContext); // Access the theme from context
   const navigate = useNavigate();
 
+
   if (width > 768) {
     return (
       <div
