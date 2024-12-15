@@ -13,7 +13,8 @@ import { SocketContext } from "../context/socketContext";
 const createChatUrl = `${import.meta.env.VITE_USER_API}/chat/createChat`;
 
 const ConversationBox = () => {
-    const {socket, getLocalStream, startCall } = useContext(SocketContext);
+    const { socket, getLocalStream, startCall, callStatus, setCallStatus,onCallUser,setOnCallUser } =
+        useContext(SocketContext);
     const { theme, receiver, width, setReceiver } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
     const chatUser = useSelector(
@@ -24,7 +25,6 @@ const ConversationBox = () => {
     );
     const dispatch = useDispatch();
     useFetchMessagesHook();
-
 
     const [newMessage, setNewMessage] = useState("");
     const typingTimeout = useRef(null);
@@ -118,18 +118,23 @@ const ConversationBox = () => {
     const requestCallHandler = async () => {
     try {
         // Wait for the local stream to be fetched before starting the call
-        await getLocalStream();  // This ensures the stream is ready before calling
+        await getLocalStream(); // This ensures the stream is ready before calling
         await startCall({
-            senderID: user._id,
+            sender: {
+                _id: user._id,
+                name: user.name,
+                profileImage: user.profileImage,
+            },
             receiverID: receiver.participant?._id,
         });
+        setCallStatus("sending");
+        setOnCallUser(receiver?.participant)
     } catch (error) {
         // Handle the error if the local stream cannot be obtained
         console.error("Error fetching local stream", error);
         alert("Unable to start the call. Please try again later.");
     }
 };
-
 
     useEffect(() => {
         return () => {
