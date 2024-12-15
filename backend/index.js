@@ -129,26 +129,26 @@ io.on("connection", async (socket) => {
         //=================//
         // webRTC response start
         //=================//
-        socket.on("offer", ({ offer, senderID, receiverID }) => {
-            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+        socket.on("offer", ({ offer, sender, receiverID }) => {
+            const receiverSocketId = onlineUsers.get(receiverID).socketId;
             console.log("Offer received from", socket.id);
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit("incomingCall", {
                     offer,
-                    senderID,
+                    sender,
                     receiverID,
                 });
             } else {
                 console.log("Receiver not available");
             }
         });
-        socket.on("answer", ({ answer, senderID, receiverID }) => {
+        socket.on("answer", ({ answer, sender, receiverID }) => {
             const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
             console.log("Answer received from", socket.id);
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit("callAnswered", {
                     answer,
-                    senderID,
+                    sender,
                     receiverID,
                 });
             } else {
@@ -157,21 +157,16 @@ io.on("connection", async (socket) => {
         });
         socket.on("ice-candidate", ({ candidate, senderID, receiverID }) => {
             const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-
             console.log("ICE candidate received:", candidate);
             if (receiverSocketId) {
-                io.to(receiverSocketId).emit("iceCandidate", {
-                    candidate,
-                    senderID,
-                    receiverID,
-                });
+                io.to(receiverSocketId).emit("iceCandidate", { candidate });
             }
         });
-        socket.on("endCall", (targetUserId) => {
-            const receiverSocketId = onlineUsers.get(targetUserId)?.socketId;
-            console.log("Call ended by user:", socket.id);
+        socket.on("endCall", (receiverID) => {
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            console.log("Call ended");
             if (receiverSocketId) {
-                io.to(receiverSocketId).emit("endCall", { from: socket.id });
+                io.to(receiverSocketId).emit("endCall");
             }
         });
         //=================//
