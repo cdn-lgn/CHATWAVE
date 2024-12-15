@@ -5,10 +5,7 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { WrapperComponentContext } from "./context/userContext";
-import Settings from "./pages/Settings";
-import { SocketProvider } from "./context/socketContext";
-import { RTCProvider } from "./context/RTCContext";
-import CallScreen from './components/CallScreen';
+import { SocketProvider } from './context/socketContext';
 
 const App = () => {
   return (
@@ -22,25 +19,7 @@ const App = () => {
             <ProtectedRoute>
               <WrapperComponentContext>
                 <SocketProvider>
-                  <RTCProvider>
-                    <Home />
-                    <CallScreen />
-                  </RTCProvider>
-                </SocketProvider>
-              </WrapperComponentContext>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <WrapperComponentContext>
-                <SocketProvider>
-                  <RTCProvider>
-                    <Settings />
-                    <CallScreen />
-                  </RTCProvider>
+                  <Home />
                 </SocketProvider>
               </WrapperComponentContext>
             </ProtectedRoute>

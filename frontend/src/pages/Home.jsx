@@ -6,6 +6,9 @@ import ChatListBox from "../components/ChatListBox";
 import ConversationBox from "../components/ConversationBox";
 import GroupListBox from "../components/GroupListBox";
 import CallListBox from "../components/CallListBox";
+import ProfileSettings from "../components/ProfileSettings";
+import { SocketContext } from "../context/socketContext";
+import CallScreen from "../components/CallScreen";
 
 const Home = () => {
   const {
@@ -16,7 +19,7 @@ const Home = () => {
     setMainViewForMobile,
   } = useContext(userContext); // Access the theme from context
   const navigate = useNavigate();
-
+  const { callStatus } = useContext(SocketContext);
 
   if (width > 768) {
     return (
@@ -24,11 +27,21 @@ const Home = () => {
         className="w-screen h-screen flex items-start justify-start gap-1 transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
-        <Navbar />
-        {middleComponent === "chatList" && <ChatListBox />}
-        {middleComponent === "groupList" && <GroupListBox />}
-        {middleComponent === "callList" && <CallListBox />}
-        <ConversationBox />
+        {callStatus != "" && <CallScreen />}
+        {mainViewForMobile === "menuScreen" && (
+          <>
+            <Navbar />
+            {middleComponent === "chatList" && <ChatListBox />}
+            {middleComponent === "groupList" && <GroupListBox />}
+            {middleComponent === "callList" && <CallListBox />}
+            <ConversationBox />
+          </>
+        )}
+        {mainViewForMobile === "settings" && (
+          <>
+            <ProfileSettings />
+          </>
+        )}
       </div>
     );
   }
@@ -39,6 +52,7 @@ const Home = () => {
         className="w-screen h-screen flex items-center justify-start gap-1 flex-col transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
+        {callStatus != "" && <CallScreen />}
         {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />
@@ -46,6 +60,11 @@ const Home = () => {
             {middleComponent === "groupList" && <GroupListBox />}
             {middleComponent === "callList" && <CallListBox />}
             <BottomBarForMobile />
+          </>
+        )}
+        {mainViewForMobile === "settings" && (
+          <>
+            <ProfileSettings />
           </>
         )}
         {mainViewForMobile === "ConversationBox" && <ConversationBox />}

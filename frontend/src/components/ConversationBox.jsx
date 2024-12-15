@@ -2,43 +2,53 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { userContext } from "../context/userContext";
-import { SocketContext } from "../context/socketContext";
 import useFetchMessagesHook from "../hooks/useFetchMessagesHook";
 import MessageBox from "./MessageBox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV, faPhone } from "@fortawesome/free-solid-svg-icons";
 import { SpinnerLoader } from "./Loader";
 import { updateChat } from "../redux/chatListSlice";
+import { SocketContext } from "../context/socketContext";
 
 const createChatUrl = `${import.meta.env.VITE_USER_API}/chat/createChat`;
 
 const ConversationBox = () => {
+    const {socket, getLocalStream, startCall } = useContext(SocketContext);
     const { theme, receiver, width, setReceiver } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
-    const chatUser = useSelector((state)=>state.chatList?.chatList[receiver?.chatID])
+    const chatUser = useSelector(
+        (state) => state.chatList?.chatList[receiver?.chatID],
+    );
     const messages = useSelector(
         (state) => state.messages?.messages[receiver?.chatID],
     );
     const dispatch = useDispatch();
     useFetchMessagesHook();
 
-    const socket = useContext(SocketContext).current;
 
     const [newMessage, setNewMessage] = useState("");
-    const typingTimeout = useRef(null)
-    const handleTyping = (e) =>{
+    const typingTimeout = useRef(null);
+    const handleTyping = (e) => {
         // e.preventDefault()
-        setNewMessage(e.target.value)
-        if(receiver?.chatID){
-            socket.emit("user_typing_status",{chatID:receiver?.chatID,receiverID:receiver?.participant._id,status:"typing..."})
+        setNewMessage(e.target.value);
+        if (receiver?.chatID) {
+            socket.emit("user_typing_status", {
+                chatID: receiver?.chatID,
+                receiverID: receiver?.participant._id,
+                status: "typing...",
+            });
 
-            clearTimeout(typingTimeout.current)
+            clearTimeout(typingTimeout.current);
 
-        typingTimeout.current =  setTimeout(()=>{
-            socket.emit("user_typing_status",{chatID:receiver?.chatID,receiverID:receiver?.participant._id,status:"online"})
-        },500)
+            typingTimeout.current = setTimeout(() => {
+                socket.emit("user_typing_status", {
+                    chatID: receiver?.chatID,
+                    receiverID: receiver?.participant._id,
+                    status: "online",
+                });
+            }, 500);
         }
-    }
+    };
 
     let isRequestPending = false;
 
@@ -97,7 +107,7 @@ const ConversationBox = () => {
                     groupID: receiver?.group?._id || receiver?._id,
                 });
             }
-            setNewMessage("")
+            setNewMessage("");
         } catch (error) {
             console.error("Error creating chat:", error);
         } finally {
@@ -105,17 +115,31 @@ const ConversationBox = () => {
         }
     };
 
-useEffect(() => {
-    return () => {
-        clearTimeout(typingTimeout.current)
-    };
-}, [])
+    const requestCallHandler = async () => {
+    try {
+        // Wait for the local stream to be fetched before starting the call
+        await getLocalStream();  // This ensures the stream is ready before calling
+        await startCall({
+            senderID: user._id,
+            receiverID: receiver.participant?._id,
+        });
+    } catch (error) {
+        // Handle the error if the local stream cannot be obtained
+        console.error("Error fetching local stream", error);
+        alert("Unable to start the call. Please try again later.");
+    }
+};
+
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(typingTimeout.current);
+        };
+    }, []);
     useEffect(() => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
-    useEffect(() => {
-    }, [chatUser])
-
+    useEffect(() => {}, [chatUser]);
 
     return (
         <div
@@ -134,18 +158,19 @@ useEffect(() => {
                     >
                         <div className="flex items-center">
                             <img
-                                src={chatUser ?
-                                    chatUser.participant?.profileImage :
-                                    receiver?.profileImage
+                                src={
+                                    chatUser
+                                        ? chatUser.participant?.profileImage
+                                        : receiver?.profileImage
                                 }
                                 alt="Friend Avatar"
                                 className="w-10 h-10 rounded-full mr-4"
                             />
                             <div>
                                 <h4 className="font-bold">
-                                    {chatUser?
-                                        chatUser?.participant?.name :
-                                        receiver?.name}
+                                    {chatUser
+                                        ? chatUser?.participant?.name
+                                        : receiver?.name}
                                 </h4>
                                 <p
                                     className="text-sm text-green-700"
@@ -157,7 +182,10 @@ useEffect(() => {
                         </div>
                         <div className="flex space-x-4">
                             <button className="text-xl">
-                                <FontAwesomeIcon icon={faPhone} />
+                                <FontAwesomeIcon
+                                    icon={faPhone}
+                                    onClick={requestCallHandler}
+                                />
                             </button>
                             <button className="text-xl">
                                 <FontAwesomeIcon icon={faEllipsisV} />
@@ -202,7 +230,7 @@ useEffect(() => {
                         <input
                             type="text"
                             value={newMessage}
-                            onChange={(e)=>handleTyping(e)}
+                            onChange={(e) => handleTyping(e)}
                             placeholder="Type a message..."
                             style={{
                                 backgroundColor: theme.inputBackground,

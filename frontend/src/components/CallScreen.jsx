@@ -1,13 +1,14 @@
-import React, { useState } from "react";
-import { FaPhoneAlt, FaPhoneSlash, FaVolumeUp, FaMicrophone, FaUserCircle } from "react-icons/fa";
-import { useRTC } from '../context/RTCContext';
+import React,{useContext} from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPhoneAlt, faPhoneSlash, faVolumeUp, faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import { SocketContext } from '../context/socketContext';
 
 const CallScreen = () => {
-  const {callStatus} = useRTC()
+  const { callStatus } = useContext(SocketContext);
   // Sample data for users
   const caller = { name: "John Doe", photo: "https://via.placeholder.com/100" };
   const receiver = { name: "Jane Smith", photo: "https://via.placeholder.com/100" };
-  
+
   return (
     <div className="flex items-center justify-center h-screen bg-gray-800">
       {/* Call Screen Container */}
@@ -19,25 +20,25 @@ const CallScreen = () => {
             <h2 className="text-xl font-bold text-gray-700 mb-2">{caller.name}</h2>
             <div className="flex justify-around text-3xl text-gray-600">
               <button className="text-green-600">
-                <FaPhoneAlt />
+                <FontAwesomeIcon icon={faPhoneAlt} />
               </button>
               <button className="text-red-600">
-                <FaPhoneSlash />
+                <FontAwesomeIcon icon={faPhoneSlash} />
               </button>
             </div>
           </div>
         )}
-        
+
         {callStatus === "sending" && (
           <div className="text-center p-6">
             <img className="w-24 h-24 rounded-full mx-auto mb-4" src={receiver.photo} alt="Receiver" />
             <h2 className="text-xl font-bold text-gray-700 mb-2">{receiver.name}</h2>
             <div className="flex justify-around text-3xl text-gray-600">
               <button className="text-red-600">
-                <FaPhoneSlash />
+                <FontAwesomeIcon icon={faPhoneSlash} />
               </button>
               <button className="text-blue-600">
-                <FaVolumeUp />
+                <FontAwesomeIcon icon={faVolumeUp} />
               </button>
             </div>
           </div>
@@ -56,10 +57,10 @@ const CallScreen = () => {
             {/* Control Buttons */}
             <div className="flex justify-around items-center py-4 text-3xl text-gray-600">
               <button className="text-red-600">
-                <FaPhoneSlash />
+                <FontAwesomeIcon icon={faPhoneSlash} />
               </button>
               <button className="text-gray-600">
-                <FaMicrophone />
+                <FontAwesomeIcon icon={faMicrophone} />
               </button>
             </div>
           </div>
