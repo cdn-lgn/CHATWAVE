@@ -85,6 +85,7 @@ export const SocketProvider = ({ children }) => {
 
     // Start a call (create offer and send it to the other peer)
     const startCall = async ({ senderID, receiverID }) => {
+        console.log(localStream)
         if (!localStream) {
             console.error("Local stream is not available!");
             alert("Local stream is not available.");
@@ -173,7 +174,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (user) {
-            socket.current = io("http://localhost:3000", {
+            socket.current = io("https://fluffy-eureka-wrrrq57wj456f9q5-3000.app.github.dev", {
                 transports: ["websocket"],
                 withCredentials: true,
             });
@@ -215,6 +216,7 @@ export const SocketProvider = ({ children }) => {
                 ({ offer, senderID, receiverID }) => {
                     console.log("Incoming call:", offer);
                     handleIncomingOffer({ offer, senderID, receiverID });
+                    setCallStatus("receiving")
                 }
             );
 
@@ -223,6 +225,7 @@ export const SocketProvider = ({ children }) => {
                 ({ answer, senderID, receiverID }) => {
                     console.log("Call answered:", answer);
                     handleIncomingAnswer({ answer, senderID, receiverID });
+                    setCallStatus("connected")
                 }
             );
 

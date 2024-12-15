@@ -13,7 +13,7 @@ import { SocketContext } from "../context/socketContext";
 const createChatUrl = `${import.meta.env.VITE_USER_API}/chat/createChat`;
 
 const ConversationBox = () => {
-    const {socket, getLocalStream, startCall } = useContext(SocketContext);
+    const {socket, getLocalStream, startCall,callStatus, setCallStatus } = useContext(SocketContext);
     const { theme, receiver, width, setReceiver } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
     const chatUser = useSelector(
@@ -123,6 +123,7 @@ const ConversationBox = () => {
             senderID: user._id,
             receiverID: receiver.participant?._id,
         });
+        setCallStatus("sending")
     } catch (error) {
         // Handle the error if the local stream cannot be obtained
         console.error("Error fetching local stream", error);
