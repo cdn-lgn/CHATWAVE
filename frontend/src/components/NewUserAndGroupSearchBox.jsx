@@ -47,7 +47,7 @@ const NewUserAndGroupSearchBox = () => {
 
   return (
     <div>
-      <div className="relative mb-4">
+      <div className="relative mb-4 z-90">
         <input
           type="search"
           placeholder="Search ..."

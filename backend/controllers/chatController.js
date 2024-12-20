@@ -167,52 +167,32 @@ export const createChat = async (req, res) => {
 
 
 
-export const updateChat = async ({
-    chatID,
-    senderID,
-    receiverID,
-    content,
-    isGroupChat=false,
-    groupID,
-}) => {
-    // console.log(chatID)
+export const updateChat = async (req,res) => {
+    
     try {
+        const {chatID,content} = req.body
         const updatedChat = await Chat.findByIdAndUpdate(
             chatID,
             { lastMessage: content },
             { new: true }
-        ).populate(
-            isGroupChat ? "group" : "participants",
-            "_id name profileImage status"
-        );
+        )
 
         if (!updatedChat) {
             throw new Error("Chat not found");
         }
 
-        const formattedChat = {
-            _id: updatedChat._id,
-            chatID:updatedChat._id,
-            isGroupChat: updatedChat.isGroupChat,
-            lastMessage: updatedChat.lastMessage,
-            ...(updatedChat.isGroupChat
-                ? {
-                      group: {
-                          groupID: updatedChat.group._id,
-                          profileImage: updatedChat.group.profileImage,
-                          name: updatedChat.group.name,
-                      },
-                  }
-                : {
-                      participant: updatedChat.participants.find(
-                          (participant) => participant._id.toString() === senderID
-                      ),
-                  }),
-        };
-        return formattedChat;
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
+// console.log(updateChat)
+          res.status(200).json({
+            message: "success",
+            success: true,
+            lastMessage:updatedChat.lastMessage
+          });
+      } catch (error) {
+          console.log(error.message);
+          res.status(500).json({
+              message: "failed",
+              success: false,
+          });
+      }
 };
 

@@ -22,7 +22,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173", "http://192.168.76.115:5173"],
+        origin: "http://localhost:5173",
         credentials: true,
     },
 });
@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use(
     cors({
         // origin: process.env.FRONTEND_URL || "http://localhost:5173",
-        origin: ["http://localhost:5173", "http://192.168.76.115:5173"],
+        origin: "http://localhost:5173",
         credentials: true,
     }),
 );
@@ -82,97 +82,23 @@ io.on("connection", async (socket) => {
         });
 
         socket.on("send_message", async (data) => {
-            const {
-                senderID,
-                receiverID,
-                chatID,
-                content,
-                isGroupChat,
-                groupID,
-                isGroupMessage,
-            } = data;
-            console.log(data);
             try {
-                let chatObj = await updateChat({
-                    senderID,
-                    receiverID,
-                    isGroupChat,
-                    groupID,
-                    chatID,
-                    content,
-                });
+                const { updatedChat, newMessage, receiverID } = data;
 
-                const messageObj = await createMessage({
-                    chatID,
-                    senderID,
-                    receiverID,
-                    isGroupMessage,
-                    groupID,
-                    content,
-                });
-
-                const incomingData = { chatObj, messageObj };
                 const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
 
                 if (receiverSocketId) {
-                    io.to(receiverSocketId).emit(
-                        "receive_message",
-                        incomingData,
-                    );
+                    io.to(receiverSocketId).emit("receive_message", {
+                        updatedChat,
+                        newMessage,
+                    });
                 }
-
-                socket.emit("receive_message", incomingData);
+                socket.emit("receive_message", {updatedChat,newMessage});
+                // socket.emit("message_delivered");
             } catch (err) {
                 console.error("Error in send_message event:", err.message);
             }
         });
-
-        //=================//
-        // webRTC response start
-        //=================//
-        socket.on("offer", ({ offer, sender, receiverID }) => {
-            const receiverSocketId = onlineUsers.get(receiverID).socketId;
-            console.log("Offer received from", socket.id);
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("incomingCall", {
-                    offer,
-                    sender,
-                    receiverID,
-                });
-            } else {
-                console.log("Receiver not available");
-            }
-        });
-        socket.on("answer", ({ answer, sender, receiverID }) => {
-            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            console.log("Answer received from", socket.id);
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("callAnswered", {
-                    answer,
-                    sender,
-                    receiverID,
-                });
-            } else {
-                console.log("Caller not available");
-            }
-        });
-        socket.on("ice-candidate", ({ candidate, senderID, receiverID }) => {
-            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            console.log("ICE candidate received:", candidate);
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("iceCandidate", { candidate });
-            }
-        });
-        socket.on("endCall", (receiverID) => {
-            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            console.log("Call ended");
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("endCall");
-            }
-        });
-        //=================//
-        // webRTC response end
-        //=================//
 
         socket.on("disconnect", async () => {
             if (userID) {

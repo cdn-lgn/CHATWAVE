@@ -29,6 +29,9 @@ const messagesSlice = createSlice({
       }
       state.messages[action.payload?.chatID].push(action.payload);
     },
+    addDummyMessageToChat:(state,action)=>{
+      
+    }
   },
 });
 

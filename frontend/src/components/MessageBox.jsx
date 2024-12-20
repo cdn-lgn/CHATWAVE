@@ -1,7 +1,9 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck,faClock } from "@fortawesome/free-solid-svg-icons";
 
-const MessageBox = ({ receiver, message, theme }) => {
+const MessageBox = ({ receiver, message, theme, waite }) => {
   const user = useSelector((state) => state.user.user);
   const isUser = message?.sender?._id == user._id;
 
@@ -21,10 +23,14 @@ const MessageBox = ({ receiver, message, theme }) => {
           backgroundColor: isUser ? theme.button : theme.secondary,
           color: isUser ? "#FFFFFF" : theme.text,
         }}
-        className={`p-3 rounded-lg max-w-xs ${isUser ? "ml-auto" : "mr-auto"}`}
+        className={`relative p-3 rounded-lg max-w-xs flex items-center justify-center gap-2 ${isUser ? "ml-auto" : "mr-auto"}`}
       >
         {/* Message content wrapped in p tag for better styling */}
-        <p className="break-words">{message?.content?.message}</p>
+        <p className="break-words w-full">{message?.content?.message}</p>
+        {isUser && (<div className="">
+        <FontAwesomeIcon icon={waite ? faClock : faCheck} className="absolute text-[12px] bottom-1 right-1" />
+        </div>
+        )}
       </div>
     </div>
   );

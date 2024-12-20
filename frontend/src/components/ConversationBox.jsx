@@ -5,16 +5,23 @@ import { userContext } from "../context/userContext";
 import useFetchMessagesHook from "../hooks/useFetchMessagesHook";
 import MessageBox from "./MessageBox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV, faPhone } from "@fortawesome/free-solid-svg-icons";
+import {
+    faEllipsisV,
+    faPhone,
+    faPaperclip
+} from "@fortawesome/free-solid-svg-icons";
 import { SpinnerLoader } from "./Loader";
 import { updateChat } from "../redux/chatListSlice";
 import { SocketContext } from "../context/socketContext";
+import AttchmentPreview from "./AttchmentPreview";
+import { addMessageToChat } from "../redux/messageSlice";
+import ImageBox from './ImageBox';
+import VoiceNoteBox from './VoiceNoteBox';
 
-const createChatUrl = `${import.meta.env.VITE_USER_API}/chat/createChat`;
+const API_URL = import.meta.env.VITE_USER_API;
 
 const ConversationBox = () => {
-    const { socket, getLocalStream, startCall, callStatus, setCallStatus,onCallUser,setOnCallUser } =
-        useContext(SocketContext);
+    const { socket } = useContext(SocketContext);
     const { theme, receiver, width, setReceiver } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
     const chatUser = useSelector(
@@ -25,6 +32,19 @@ const ConversationBox = () => {
     );
     const dispatch = useDispatch();
     useFetchMessagesHook();
+    const [attchment, setAttchment] = useState(null);
+    const [dummyMessage, setDummyMessage] = useState();
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5000000) {
+                alert("attchment maximum size 5MB");
+                return;
+            }
+            setAttchment(file);
+        }
+    };
 
     const [newMessage, setNewMessage] = useState("");
     const typingTimeout = useRef(null);
@@ -32,7 +52,7 @@ const ConversationBox = () => {
         // e.preventDefault()
         setNewMessage(e.target.value);
         if (receiver?.chatID) {
-            socket.emit("user_typing_status", {
+            socket.current.emit("user_typing_status", {
                 chatID: receiver?.chatID,
                 receiverID: receiver?.participant._id,
                 status: "typing...",
@@ -41,7 +61,7 @@ const ConversationBox = () => {
             clearTimeout(typingTimeout.current);
 
             typingTimeout.current = setTimeout(() => {
-                socket.emit("user_typing_status", {
+                socket.current.emit("user_typing_status", {
                     chatID: receiver?.chatID,
                     receiverID: receiver?.participant._id,
                     status: "online",
@@ -62,16 +82,15 @@ const ConversationBox = () => {
 
         let chatID = receiver?.chatID;
         let createdChat;
+        const content = { type: "text", message: newMessage };
+        setDummyMessage({content:content})
 
         try {
             if (!chatID) {
                 const response = await axios.post(
-                    createChatUrl,
+                    `${API_URL}/chat/createChat`,
                     {
-                        content: {
-                            type: "text",
-                            message: newMessage,
-                        },
+                        content,
                         isGroupChat: receiver?.entityType === "group",
                         groupID:
                             receiver?.entityType === "group"
@@ -93,21 +112,37 @@ const ConversationBox = () => {
             }
 
             if (chatID) {
-                socket.emit("send_message", {
-                    senderID: user?._id,
-                    content: {
-                        type: "text",
-                        message: newMessage,
+                const updatedLastMessage = await axios.post(
+                    `${API_URL}/chat/updateChat`,
+                    { chatID, content },
+                    { withCredentials: true },
+                );
+                const message = await axios.post(
+                    `${API_URL}/message/createMessage`,
+                    {
+                        chatID,
+                        senderID: user._id,
+                        receiverID: receiver?.participant?._id,
+                        isGroupMessage: receiver?.isGroupChat,
+                        groupID: receiver?.group?._id,
+                        content,
                     },
-                    isGroupChat:
-                        receiver?.isGroupChat ||
-                        receiver.entityType === "group",
-                    chatID: chatID,
-                    receiverID: receiver?.participant?._id || receiver?._id,
-                    groupID: receiver?.group?._id || receiver?._id,
+                    { withCredentials: true },
+                );
+                setDummyMessage("")
+                setNewMessage("");
+
+                // console.log(message.data)
+                // console.log(updatedLastMessage.data)
+                socket.current.emit("send_message", {
+                    updatedChat: {
+                        lastMessage: updatedLastMessage.data.lastMessage,
+                        _id: chatID,
+                    },
+                    newMessage: message.data.formattedMessage,
+                    receiverID: receiver?.participant?._id,
                 });
             }
-            setNewMessage("");
         } catch (error) {
             console.error("Error creating chat:", error);
         } finally {
@@ -115,30 +150,10 @@ const ConversationBox = () => {
         }
     };
 
-    const requestCallHandler = async () => {
-    try {
-        // Wait for the local stream to be fetched before starting the call
-        await getLocalStream(); // This ensures the stream is ready before calling
-        await startCall({
-            sender: {
-                _id: user._id,
-                name: user.name,
-                profileImage: user.profileImage,
-            },
-            receiverID: receiver.participant?._id,
-        });
-        setCallStatus("sending");
-        setOnCallUser(receiver?.participant)
-    } catch (error) {
-        // Handle the error if the local stream cannot be obtained
-        console.error("Error fetching local stream", error);
-        alert("Unable to start the call. Please try again later.");
-    }
-};
-
     useEffect(() => {
         return () => {
             clearTimeout(typingTimeout.current);
+            setDummyMessage("");
         };
     }, []);
     useEffect(() => {
@@ -149,7 +164,7 @@ const ConversationBox = () => {
     return (
         <div
             style={{ backgroundColor: theme.background, color: theme.text }}
-            className={`flex flex-col h-dvh ${width <= 768 ? "min-w-full" : "w-2/3"}`}
+            className={`relative flex flex-col h-dvh ${width <= 768 ? "min-w-full" : "w-2/3"}`}
         >
             {receiver && (
                 <>
@@ -186,11 +201,8 @@ const ConversationBox = () => {
                             </div>
                         </div>
                         <div className="flex space-x-4">
-                            <button className="text-xl">
-                                <FontAwesomeIcon
-                                    icon={faPhone}
-                                    onClick={requestCallHandler}
-                                />
+                            <button className="text-xl hidden">
+                                <FontAwesomeIcon icon={faPhone} />
                             </button>
                             <button className="text-xl">
                                 <FontAwesomeIcon icon={faEllipsisV} />
@@ -199,32 +211,79 @@ const ConversationBox = () => {
                     </div>
 
                     {/* Message Area */}
-                    <div className="flex-grow p-4 overflow-y-auto">
+                    <div className="flex-grow p-4 overflow-y-auto transition-all duration-300">
                         {/* Render messages only if they exist */}
-                        {messages && messages.length > 0 ? (
-                            messages.map((message, idx) => (
-                                <MessageBox
-                                    key={idx}
-                                    receiver={receiver}
-                                    message={message}
-                                    theme={theme}
-                                />
-                            ))
-                        ) : receiver?.chatID ? (
-                            <div className="flex w-full h-full items-center justify-center">
-                                <SpinnerLoader />
-                            </div>
-                        ) : (
-                            <div className="flex w-full h-full items-center justify-center">
-                                <p>No message yet</p>
-                            </div>
+                        {
+  messages && messages.length > 0 ? (
+    messages.map((message, idx) => (
+      <React.Fragment key={idx}>
+        {message?.content?.type === "text" && (
+          <MessageBox
+            receiver={receiver}
+            message={message}
+            theme={theme}
+          />
+        )}
+        {message?.content?.type === "image" && (
+          <ImageBox
+            receiver={receiver}
+            message={message}
+            theme={theme}
+          />
+        )}
+        {message?.content?.type === "audio" && (
+          <VoiceNoteBox
+            receiver={receiver}
+            message={message}
+            theme={theme}
+          />
+        )}
+      </React.Fragment>
+    ))
+  ) : receiver?.chatID ? (
+    <div className="flex w-full h-full items-center justify-center">
+      <SpinnerLoader />
+    </div>
+  ) : (
+    <div className="flex w-full h-full items-center justify-center">
+      <p>No message yet</p>
+    </div>
+  )
+}
+
+                        {dummyMessage && dummyMessage?.content?.type=="text" && (
+                            <MessageBox
+                                message={{sender:{_id:user._id},...dummyMessage}}
+                                theme={theme}
+                                waite={true}
+                            />
                         )}
+                        {dummyMessage && dummyMessage?.content?.type=="image" && (<ImageBox
+                                    
+                                    message={{sender:{_id:user._id},...dummyMessage}}
+                                    theme={theme}
+                                    waite={true}
+                                    />)}
+                                {dummyMessage && dummyMessage?.content?.type=="audio" && (<VoiceNoteBox
+                                    
+                                    message={{sender:{_id:user._id},...dummyMessage}}
+                                    theme={theme}
+                                    waite={true}
+                                    />)}
 
                         {/* This ref will be used to scroll to the bottom */}
                         <div ref={messageEndRef}></div>
                     </div>
 
                     {/* Input Area */}
+                    {attchment && (
+                        <AttchmentPreview
+                            attchment={attchment}
+                            setAttchment={setAttchment}
+                            setDummyMessage={setDummyMessage}
+                            dummyMessage={dummyMessage}
+                        />
+                    )}
                     <div
                         style={{
                             backgroundColor: theme.secondary,
@@ -232,6 +291,32 @@ const ConversationBox = () => {
                         }}
                         className="p-4 flex items-center space-x-4"
                     >
+                        {receiver.chatID && (
+                            <>
+                                <label htmlFor="attachment-input">
+                                    <FontAwesomeIcon
+                                        icon={faPaperclip}
+                                        htmlFor="attachment-input"
+                                        name="attchment"
+                                        className="h-5 w-5 cursor-pointer rounded-full py-2 px-2"
+                                        style={{
+                                            backgroundColor: theme.button,
+                                            color: "#FFFFFF",
+                                        }}
+                                    />
+                                </label>
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    onClick={(event) => {
+                                        event.currentTarget.value = null;
+                                    }}
+                                    style={{ display: "none" }}
+                                    accept="image/*,audio/*,.pdf"
+                                    id="attachment-input"
+                                />
+                            </>
+                        )}
                         <input
                             type="text"
                             value={newMessage}
@@ -244,6 +329,7 @@ const ConversationBox = () => {
                             }}
                             className="flex-grow p-3 rounded-lg border"
                         />
+
                         <button
                             onClick={sendMessage}
                             style={{

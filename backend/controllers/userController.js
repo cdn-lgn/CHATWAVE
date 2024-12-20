@@ -5,7 +5,7 @@ import User from "../models/userSchema.js";
 import Group from "../models/groupSchema.js";
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "2d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET);
 };
 
 export const signUp = async (req, res) => {

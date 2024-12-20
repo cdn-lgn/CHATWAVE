@@ -1,0 +1,28 @@
+/* Container to wrap everything and provide padding */
+.audio-container {
+  max-width: 400px; /* You can adjust this to fit your needs */
+  margin: 0 auto; /* Center the audio player */
+  padding: 20px;
+  text-align: center;
+}
+
+/* Custom styling for the audio player */
+.audio-player {
+  width: 100%;
+  border-radius: 12px; /* Rounded corners for the audio player */
+  border: none; /* Remove the default border */
+  background-color: #f4f4f4; /* Optional background color */
+  height: 50px; /* You can adjust the height */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Custom controls (Optional: Hide default controls if you want to create custom ones) */
+.audio-player::-webkit-media-controls-panel {
+  background-color: transparent; /* Hide the background */
+}
+.audio-player::-webkit-media-controls-play-button {
+  background-color: transparent; /* Remove background of play button */
+}
+.audio-player::-webkit-media-controls-volume-slider {
+  background-color: transparent; /* Make volume slider look cleaner */
+}

@@ -10,6 +10,7 @@ const UserGroupCardForList = ({userOrGroup, theme }) => {
 
 const clickHandler =()=>{
   setReceiver(userOrGroup)
+  
 }
   return (
     <div
@@ -36,7 +37,7 @@ const clickHandler =()=>{
           className="text-sm whitespace-nowrap overflow-hidden text-ellipsis"
           style={{ color: theme.text }}
         >
-          {userOrGroup?.lastMessage?.message}
+          {userOrGroup?.lastMessage.name ? userOrGroup?.lastMessage?.name : userOrGroup?.lastMessage?.message}
         </p>
       </div>
       {(userOrGroup?.participant?.status === "online" || userOrGroup?.participant?.status === "typing...") && (

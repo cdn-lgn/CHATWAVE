@@ -27,7 +27,7 @@ const Home = () => {
         className="w-screen h-screen flex items-start justify-start gap-1 transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
-        {callStatus != "" && <CallScreen />}
+        {/*{callStatus != "" && <CallScreen />}*/}
         {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />
@@ -52,7 +52,7 @@ const Home = () => {
         className="w-screen h-screen flex items-center justify-start gap-1 flex-col transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
-        {callStatus != "" && <CallScreen />}
+        {/*{callStatus != "" && <CallScreen />}*/}
         {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />

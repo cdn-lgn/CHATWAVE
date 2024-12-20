@@ -23,10 +23,11 @@ const messageSchema = new mongoose.Schema(
       default: null,
     },
     content: {
+      name:{type:String,default:null},
       type: {
         type: String,
         required: true,
-        enum: ["text", "image", "video", "file"],
+        enum: ["text", "image", "audio", "application"],
       },
       message: {
         type: String,
