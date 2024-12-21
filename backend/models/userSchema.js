@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, select: false }, // Exclude by default
     profileImage: { type: String, required: true },
     about: { type: String },
-    hideAccount: { type: Boolean},
+    hiddenAccount: { type: Boolean,default:false,required:true },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Blocked users
     status: { type: String, default:"offline" },
     entityType: { type: String, default: "user", immutable: true }

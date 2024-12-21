@@ -82,7 +82,7 @@ console.log(file)
                 sender: senderID,
                 content: {
                     name: file.originalname,
-                    type: file.mimetype.split('/')[0],
+                    type:  file.mimetype.split('/')[0]=="application" ? "pdf" : file.mimetype.split('/')[0],
                     message: uploadImage.url,
                 },
             };

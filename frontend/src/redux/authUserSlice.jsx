@@ -11,8 +11,12 @@ const authUserSlice = createSlice({
     reducers: {
         // Reducer function to set the user
         setUser: (state, action) => {
-            state.user = action.payload; 
-            state.lastUpdated = Date.now()
+            state.user = action.payload;
+        },
+        updateAccountStatus:(state,action)=>{
+            state.user.hiddenAccount = action.payload
+            console.log("state.user.hiddenAccount",state.user.hiddenAccount)
+            console.log("action.payload ",action.payload)
         },
         // Reducer function to reset the user (set it to null)
         resetUser: (state) => {
@@ -23,6 +27,6 @@ const authUserSlice = createSlice({
 });
 
 
-export const {setUser,resetUser} = authUserSlice.actions
+export const {setUser,resetUser,updateAccountStatus} = authUserSlice.actions
 
 export default authUserSlice.reducer

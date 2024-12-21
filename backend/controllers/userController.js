@@ -99,7 +99,6 @@ export const updateUser = async (req, res) => {
       dataForUpdate.profileImage = uploadedImage.url
     }
 
-
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: dataForUpdate },
@@ -119,6 +118,27 @@ export const updateUser = async (req, res) => {
     });
   }
 };
+
+
+export const hideUser = async(req,res)=>{
+try {
+  const {hideUser} = req.body
+  const userID = req.user.id
+  const update = await User.findByIdAndUpdate(userID,{hiddenAccount:!hideUser},{new:true})
+// console.log(hideUser)
+    res.status(200).json({
+      message: "success",
+      success: true,
+      hiddenAccount:update.hiddenAccount
+    });
+} catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+        message: "failed",
+        success: false,
+    });
+}
+}
 
 // Logout Function
 export const logOut = async (req, res) => {

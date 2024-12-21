@@ -6,10 +6,13 @@ import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 const UserGroupCardForList = ({userOrGroup, theme }) => {
 
-  const {receiver,setReceiver} = useContext(userContext)
+  const {receiver,setReceiver,setMainViewForMobile,setRightComponent} = useContext(userContext)
 
 const clickHandler =()=>{
   setReceiver(userOrGroup)
+  setMainViewForMobile("ConversationBox")
+  setRightComponent("ConversationBox")
+
   
 }
   return (

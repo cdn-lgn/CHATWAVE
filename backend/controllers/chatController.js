@@ -196,3 +196,68 @@ export const updateChat = async (req,res) => {
       }
 };
 
+
+export const addToGroupChat = async (groupID, memberID) => {
+    try {
+        // Check if a group chat already exists for this group
+        let groupChat = await Chat.findOne({ group: groupID });
+
+        // If a group chat does not exist, create a new one
+        if (!groupChat) {
+            groupChat = new Chat({
+                isGroupChat: true,
+                participants: [memberID], // Adding the new member to the group chat
+                group: groupID, // Reference to the group
+                lastMessage: {
+                    type: "text",
+                    message: null,
+                },
+            });
+           groupChat= await groupChat.save();
+        } else {
+            // Group chat exists, add the member to the participants
+            if (!groupChat.participants.includes(memberID)) {
+                groupChat.participants.push(memberID);
+               groupChat= await groupChat.save();
+            }
+        }
+        groupChat = await groupChat.populate("group","name _id profileImage")
+           groupChat = {...groupChat._doc,chatID:groupChat._id}
+        
+        console.log("User added to group chat successfully");
+    return groupChat
+    } catch (error) {
+        console.error("Error adding user to group chat:", error.message);
+        throw new Error("Failed to add user to group chat");
+    }
+};
+
+export const removeFromGroupChat = async (groupID, memberID) => {
+    try {
+        // Check if a group chat exists for this group
+        const groupChat = await Chat.findOne({ group: groupID });
+
+        if (!groupChat) {
+            throw new Error("Group chat not found");
+        }
+
+        // If the user is in the participants list, remove them
+        if (groupChat.participants.includes(memberID)) {
+            groupChat.participants = groupChat.participants.filter(
+                (participantID) => participantID.toString() !== memberID.toString()
+            );
+
+            await groupChat.save();
+            console.log("User removed from group chat successfully");
+
+            // If there are no participants left in the group chat, consider deleting the chat
+            if (groupChat.participants.length === 0) {
+                await groupChat.delete();
+                console.log("Group chat deleted as there are no participants left");
+            }
+        }
+    } catch (error) {
+        console.error("Error removing user from group chat:", error.message);
+        throw new Error("Failed to remove user from group chat");
+    }
+};

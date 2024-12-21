@@ -10,7 +10,6 @@ const groupSchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
-    admins: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     createdAt: { type: Date, default: Date.now },
     entityType: { type: String, default: "group", immutable: true },
 });

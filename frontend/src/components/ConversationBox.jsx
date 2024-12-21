@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faEllipsisV,
     faPhone,
-    faPaperclip
+    faPaperclip,faChevronLeft
 } from "@fortawesome/free-solid-svg-icons";
 import { SpinnerLoader } from "./Loader";
 import { updateChat } from "../redux/chatListSlice";
@@ -17,12 +17,13 @@ import AttchmentPreview from "./AttchmentPreview";
 import { addMessageToChat } from "../redux/messageSlice";
 import ImageBox from './ImageBox';
 import VoiceNoteBox from './VoiceNoteBox';
+import FileBox from './FileBox';
 
 const API_URL = import.meta.env.VITE_USER_API;
 
 const ConversationBox = () => {
     const { socket } = useContext(SocketContext);
-    const { theme, receiver, width, setReceiver } = useContext(userContext);
+    const { theme, receiver, width, setReceiver,setMainViewForMobile } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
     const chatUser = useSelector(
         (state) => state.chatList?.chatList[receiver?.chatID],
@@ -174,9 +175,10 @@ const ConversationBox = () => {
                             backgroundColor: theme.secondary,
                             borderBottom: `1px solid ${theme.border}`,
                         }}
-                        className="flex justify-between items-center p-4"
+                        className="flex justify-between items-center p-4 pl-0 md:pl-4"
                     >
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
+                        <FontAwesomeIcon icon={faChevronLeft} className="md:hidden h-[20px] w-[20px] cursor-pointer" onClick={()=>setMainViewForMobile("menuScreen")}/>
                             <img
                                 src={
                                     chatUser
@@ -211,7 +213,7 @@ const ConversationBox = () => {
                     </div>
 
                     {/* Message Area */}
-                    <div className="flex-grow p-4 overflow-y-auto transition-all duration-300">
+                    <div className="flex-grow p-4 overflow-y-auto transition-all duration-300 scrollable-for-chat">
                         {/* Render messages only if they exist */}
                         {
   messages && messages.length > 0 ? (
@@ -233,6 +235,13 @@ const ConversationBox = () => {
         )}
         {message?.content?.type === "audio" && (
           <VoiceNoteBox
+            receiver={receiver}
+            message={message}
+            theme={theme}
+          />
+        )}
+        {message?.content?.type === "pdf" && (
+          <FileBox
             receiver={receiver}
             message={message}
             theme={theme}
@@ -266,6 +275,11 @@ const ConversationBox = () => {
                                     />)}
                                 {dummyMessage && dummyMessage?.content?.type=="audio" && (<VoiceNoteBox
                                     
+                                    message={{sender:{_id:user._id},...dummyMessage}}
+                                    theme={theme}
+                                    waite={true}
+                                    />)}
+                                {dummyMessage && dummyMessage?.content?.type=="pdf" && (<FileBox
                                     message={{sender:{_id:user._id},...dummyMessage}}
                                     theme={theme}
                                     waite={true}

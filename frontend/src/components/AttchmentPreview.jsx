@@ -24,7 +24,7 @@ const AttachmentPreview = ({ attchment, setAttchment, setDummyMessage }) => {
 	const sendFileHandler = async (e) => {
 		setDummyMessage({ content : {
       name: attchment.name,  // File name
-      type: attchment.type.split("/")[0],  // Determine file type
+      type: attchment.type.split('/')[0]=="application" ? "pdf" : attchment.type.split('/')[0],  // Determine file type
       message: URL.createObjectURL(attchment)  // URL to access the file
     }});
 
@@ -112,7 +112,7 @@ const AttachmentPreview = ({ attchment, setAttchment, setDummyMessage }) => {
 				</div>
 			) : attchment.type.includes("pdf") ? (
 				<div
-					className={`w-64 flex items-center justify-between gap-2 rounded-lg p-2 border-2`}
+					className={`w-64 flex items-center justify-start gap-2 rounded-lg p-2 border-2`}
 					style={{
 						background: theme.background,
 						borderColor: theme.button || "#ccc", // Dynamically set border color
@@ -126,9 +126,13 @@ const AttachmentPreview = ({ attchment, setAttchment, setDummyMessage }) => {
 						}}
 						className="p-3 w-6 h-6 rounded-full"
 					/>
-					<p className="whitespace-nowrap overflow-hidden text-ellipsis">
+					<div className="w-full whitespace-nowrap overflow-hidden text-ellipsis flex flex-col items-start justify-start">
+						
+					<p className="w-full whitespace-nowrap overflow-hidden text-ellipsis -mb-1">
 						{attchment.name}
 					</p>
+					<p className="text-sm" style={{color:theme.buttonHover}}>{attchment.type.split("/")[1]}</p>
+					</div>
 				</div>
 			) : (
 				<div>

@@ -10,7 +10,7 @@ import {
   faUsers,
   faClose,
 } from "@fortawesome/free-solid-svg-icons";
-import NewUserAndGroupSearchBox from "./NewUserAndGroupSearchBox";
+import NewUserAndSearchBox from "./NewUserAndSearchBox";
 import CreateNewGroupBox from "./CreateNewGroupBox";
 import useFetchChatList from '../hooks/chatListHook';
 
@@ -51,23 +51,10 @@ const ChatListBox = () => {
     };
   }, []);
   
-// useEffect(() => {
-//     if (socket) {
-//         socket.current.on("receive_message", ({ chat }) => {
-//             if (!chatList[chat.chatID]) {
-//                 // If chat doesn't exist, add it
-//                 dispatch(setChatList([chat]));
-//             }
-//         });
-//     }
-// }, [socket, chatList, dispatch]);
-
-
-
   return (
     <div
       style={{ backgroundColor: theme.background }}
-      className={`p-4 h-full relative ${width <= 768 ? "min-w-full" : "w-1/3"}`}
+      className={`p-4 h-full relative z-10 ${width <= 768 ? "min-w-full" : "w-1/3"}`}
     >
       {/* Search Bar */}
       <div className="relative mb-4">
@@ -114,32 +101,30 @@ const ChatListBox = () => {
       >
         {plusOptions && (
           <div
-            className="mt-2 w-40 bg-white shadow-lg rounded-lg transition-transform duration-300 transform scale-100 opacity-100"
-            style={{ height: "auto" }}
+            className="mt-2 w-40 bg-white shadow-lg rounded-lg transition-transform duration-300 transform scale-100 opacity-100 mb-2"
+            style={{ height: "auto" ,background:theme.secondary ,color: theme.text }}
           >
             <div
-              className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+              className="flex rounded-lg items-center p-2 hover:shadow-2xl cursor-pointer"
               onClick={() => setNewUserSearchTab(true)}
             >
               <FontAwesomeIcon
                 icon={faComment}
                 className="mr-2"
-                style={{ color: theme.text }}
               />
               <span>New Chat</span>
             </div>
             {/*goup functionality stopped for now*/}
-            {/*<div
-              className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+            <div
+              className="flex rounded-lg items-center p-2 hover:shadow-2xl cursor-pointer"
               onClick={() => setNewGroupTab(true)}
             >
               <FontAwesomeIcon
                 icon={faUsers}
                 className="mr-2"
-                style={{ color: theme.text }}
               />
               <span>Create Group</span>
-            </div>*/}
+            </div>
           </div>
         )}
         <FontAwesomeIcon
@@ -168,7 +153,7 @@ const ChatListBox = () => {
                 className="cursor-pointer text-2xl"
               />
             </div>
-            <NewUserAndGroupSearchBox />
+            <NewUserAndSearchBox setNewUserSearchTab={setNewUserSearchTab}/>
           </div>
         </>
       )}
@@ -191,7 +176,7 @@ const ChatListBox = () => {
                 className="cursor-pointer text-2xl"
               />
             </div>
-            <CreateNewGroupBox />
+            <CreateNewGroupBox setNewGroupTab={setNewGroupTab} />
           </div>
         </>
       )}

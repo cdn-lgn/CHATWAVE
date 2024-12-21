@@ -7,8 +7,8 @@ import axios from "axios";
 
 const searchAllUrl = `${import.meta.env.VITE_USER_API}/search/searchAll`;
 
-const NewUserAndGroupSearchBox = () => {
-  const { theme,receiver, setReceiver } = useContext(userContext);
+const NewUserAndSearchBox = ({setNewUserSearchTab}) => {
+  const { theme,receiver, setReceiver,setMainViewForMobile,setRightComponent } = useContext(userContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const chatList = useSelector(state=>state.chatList.chatList)
@@ -32,9 +32,9 @@ const NewUserAndGroupSearchBox = () => {
   const clickOnSearchResult = (item) => {
     const foundChat = Object.values(chatList).find((chat) => {
         if (item.entityType === "group") {
-            return item._id === chat.groupID;
+            return item._id === chat.group?._id;
         } else {
-            return item._id === chat.participantID;
+            return item._id === chat.participant?._id;
         }
     });
     if (foundChat) {
@@ -42,11 +42,15 @@ const NewUserAndGroupSearchBox = () => {
     } else {
         setReceiver(item); // If no match, set item as receiver
     }
+    setMainViewForMobile("ConversationBox")
+  setRightComponent("ConversationBox")
+    setNewUserSearchTab(false)
 };
 
 
+
   return (
-    <div>
+    <div className="z-10">
       <div className="relative mb-4 z-90">
         <input
           type="search"
@@ -74,42 +78,45 @@ const NewUserAndGroupSearchBox = () => {
       >
         {searchResult.length > 0 ? (
           searchResult.map((item) => (
-            <div
-              key={item._id} // Add a unique key prop
-              className="flex items-center gap-2 w-full rounded-lg cursor-pointer"
-              style={{ background: theme.border }}
-              onClick={()=>clickOnSearchResult(item)}
-            >
-              {/* Profile Image */}
-              <img
-                src={item?.profileImage}
-                alt={item?.name}
-                className="w-12 h-12 rounded-full object-cover"
-              />
+    <div
+  key={item._id} // Add a unique key prop
+  className="flex items-center p-1 gap-1 w-full rounded-lg cursor-pointer"
+  style={{ background: theme.border }}
+  onClick={() => clickOnSearchResult(item)}
+>
+  {/* Profile Image */}
+  <div className="w-14 h-full rounded-full overflow-hidden"> 
+    <img
+      src={item?.profileImage}
+      alt={item?.name}
+      className="object-cover w-12 h-12 rounded-full"
+    />
+  </div>
 
-              {/* Item Details */}
-              <div className="flex flex-col w-full">
-                {/* Group Name and Entity Type */}
-                <div className="flex justify-between items-center w-full px-2">
-                  <h5
-                    className="font-medium font-extrabold"
-                    style={{ color: theme.text }}
-                  >
-                    {item?.name}
-                  </h5>
+  {/* Item Details */}
+  <div className="flex flex-col w-full">
+    {/* Group Name and Entity Type */}
+    <div className="flex justify-between items-center w-full px-2">
+      <h5
+        className="font-medium font-extrabold"
+        style={{ color: theme.text }}
+      >
+        {item?.name}
+      </h5>
 
-                  {/* Entity Type (e.g., "group") */}
-                  {item?.entityType === "group" && (
-                    <p
-                      className="text-[12px]"
-                      style={{ color: theme.mutedText }}
-                    >
-                      {item?.entityType}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+      {/* Entity Type (e.g., "group") */}
+      {item?.entityType === "group" && (
+        <p
+          className="text-[12px]"
+          style={{ color: theme.mutedText }}
+        >
+          {item?.entityType}
+        </p>
+      )}
+    </div>
+  </div>
+</div>
+
           ))
         ) : (
           <p style={{ color: theme.mutedText }}>enter name and search</p>
@@ -119,4 +126,4 @@ const NewUserAndGroupSearchBox = () => {
   );
 };
 
-export default NewUserAndGroupSearchBox;
+export default NewUserAndSearchBox;

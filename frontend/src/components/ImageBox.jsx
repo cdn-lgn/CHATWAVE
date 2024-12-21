@@ -23,7 +23,7 @@ const ImageBox = ({ message, theme, receiver, waite }) => {
       )}
 
       {/* Image container */}
-      <div className={`relative w-1/2 flex items-center justify-center ${isUser ? "ml-auto" : "mr-auto"}`}>
+      <div className={`relative w-1/2 md:w-1/3 flex items-center justify-center ${isUser ? "ml-auto" : "mr-auto"}`}>
         <img
           src={message?.content?.message}
           alt="Shared Content"

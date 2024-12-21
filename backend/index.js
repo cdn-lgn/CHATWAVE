@@ -50,7 +50,7 @@ if (process.env.NODE_ENV === "development") {
 // Routes
 app.use("/api/user", userAuthRoute);
 app.use("/api/userStatus", userStatusRoute);
-app.use("/api/group", groupRoute);
+app.use("/api/groups", groupRoute);
 app.use("/api/search", searchRoute);
 app.use("/api/chat", chatRoute);
 app.use("/api/message", messageRoute);

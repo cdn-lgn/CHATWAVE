@@ -1,17 +1,23 @@
 import React, { useContext, useState } from "react";
-import {useDispatch} from "react-redux"
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { userContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
-import { setUser } from '../redux/authUserSlice';
+import { setUser } from "../redux/authUserSlice";
 
 const updateUserUrl = `${import.meta.env.VITE_USER_API}/user/updateUser`;
 
 const ProfileSettings = () => {
     const user = useSelector((state) => state.user.user);
-    const { theme } = useContext(userContext);
-    const dispatch = useDispatch()
+    const {
+        theme,
+        setMainViewForMobile,
+        setMiddleComponent,
+        setRightComponent,
+        receiver,
+    } = useContext(userContext);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     // State for form data with only changed fields
@@ -42,6 +48,11 @@ const ProfileSettings = () => {
         }
     };
 
+    const handleBackClick = () => {
+        setMainViewForMobile("menuScreen");
+        setMiddleComponent("chatList");
+        setRightComponent(receiver ? "ConversationBox" : "");
+    };
     // Submit handler
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -63,12 +74,16 @@ const ProfileSettings = () => {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
 
-console.log(response.data.user)
-                dispatch(setUser({
-                ...response.data.user,
-                userCreatedGroups: user.userCreatedGroups, // Persist existing groups
-            }))
-                navigate("/")
+                console.log(response.data.user);
+                dispatch(
+                    setUser({
+                        ...response.data.user,
+                        userCreatedGroups: user.userCreatedGroups, // Persist existing groups
+                    }),
+                );
+                setMiddleComponent("chatList");
+                setRightComponent(receiver ? "ConversationBox" : "");
+                setMainViewForMobile("menuScreen");
             } catch (error) {
                 console.log(error.message);
             }
@@ -77,18 +92,18 @@ console.log(response.data.user)
 
     return (
         <div
-            className="flex items-center justify-start md:flex-col w-full"
+            className="flex h-full items-center justify-start md:flex-col w-full scrollable-container overflow-auto"
             style={{ backgroundColor: theme.secondary }}
         >
             <div className="w-full">
-                <main className="w-full py-1">
-                    <div className="p-2 md:p-4">
+                <main className="w-full">
+                    <div className="py-2">
                         <div
-                            className="w-full px-6 pb-8 mt-8 sm:rounded-lg"
+                            className="w-full px-6 pb-10 rounded-lg"
                             style={{ backgroundColor: theme.background }}
                         >
                             <h2
-                                className="pl-6 text-2xl font-bold sm:text-xl"
+                                className="text-2xl font-bold sm:text-xl"
                                 style={{ color: theme.text }}
                             >
                                 Public Profile
@@ -100,10 +115,11 @@ console.log(response.data.user)
                             >
                                 <div className="flex flex-col items-center space-y-5 sm:flex-row sm:space-y-0">
                                     <img
-                                        className="object-cover w-40 h-40 p-1 rounded-full"
+                                        className="object-cover w-40 h-40 p-1 rounded-full "
+                                        draggable="false"
                                         style={{
                                             ringColor: theme.primary,
-                                            border: `2px solid ${theme.primary}`,
+                                            border: `2px solid ${theme.button}`,
                                         }}
                                         src={
                                             profileImage
@@ -202,7 +218,7 @@ console.log(response.data.user)
                                         <textarea
                                             id="about"
                                             rows="4"
-                                            className="block w-full text-sm rounded-lg border"
+                                            className="block w-full text-sm rounded-lg border p-1"
                                             style={{
                                                 backgroundColor:
                                                     theme.inputBackground,
@@ -218,7 +234,7 @@ console.log(response.data.user)
                                     <div className="flex items-center justify-center gap-4">
                                         <button
                                             type="button"
-                                            onClick={()=>navigate("/")}
+                                            onClick={handleBackClick}
                                             className="font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                                             style={{
                                                 backgroundColor:

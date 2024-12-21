@@ -21,14 +21,14 @@ const VoiceNoteBox = ({ message, theme, receiver, waite }) => {
       )}
 
       {/* Voice note container */}
-      <div className={`relative w-2/3 flex items-center justify-center rounded-lg border-2 ${isUser ? "ml-auto" : "mr-auto"}`} style={{borderColor:theme.button}} >
+      <div className={`relative w-2/3 md:w-1/2 flex items-center justify-center rounded-lg border-2 ${isUser ? "ml-auto" : "mr-auto"}`} style={{borderColor:theme.button}} >
         <div className="audio-container w-full relative ">
-          <h3
+          <p
             style={{ color: theme.text }}
-            className="font-bold whitespace-nowrap overflow-hidden text-ellipsis"
+            className="whitespace-nowrap overflow-hidden text-ellipsis"
           >
             {message?.content?.name}
-          </h3>
+          </p>
           <audio
             controls
             className="audio-player"
@@ -37,11 +37,11 @@ const VoiceNoteBox = ({ message, theme, receiver, waite }) => {
             <source src={message?.content?.message} />
             Your browser does not support the audio element.
           </audio>
+        </div>
           {isUser && (<div className="">
         <FontAwesomeIcon icon={waite ? faClock : faCheck} className="absolute w-[12px] h-[12px] bottom-1 right-1 rounded-full" style={{backgroundColor:theme.background}}  />
         </div>
         )}
-        </div>
       </div>
     </div>
   );
