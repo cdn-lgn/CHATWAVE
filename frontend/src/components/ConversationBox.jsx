@@ -8,22 +8,30 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faEllipsisV,
     faPhone,
-    faPaperclip,faChevronLeft
+    faPaperclip,
+    faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { SpinnerLoader } from "./Loader";
 import { updateChat } from "../redux/chatListSlice";
 import { SocketContext } from "../context/socketContext";
 import AttchmentPreview from "./AttchmentPreview";
 import { addMessageToChat } from "../redux/messageSlice";
-import ImageBox from './ImageBox';
-import VoiceNoteBox from './VoiceNoteBox';
-import FileBox from './FileBox';
+import ImageBox from "./ImageBox";
+import VoiceNoteBox from "./VoiceNoteBox";
+import FileBox from "./FileBox";
 
 const API_URL = import.meta.env.VITE_USER_API;
 
 const ConversationBox = () => {
     const { socket } = useContext(SocketContext);
-    const { theme, receiver, width, setReceiver,setMainViewForMobile } = useContext(userContext);
+    const {
+        theme,
+        receiver,
+        width,
+        setReceiver,
+        setMainViewForMobile,
+        setRightComponent,
+    } = useContext(userContext);
     const user = useSelector((state) => state.user.user);
     const chatUser = useSelector(
         (state) => state.chatList?.chatList[receiver?.chatID],
@@ -32,9 +40,16 @@ const ConversationBox = () => {
         (state) => state.messages?.messages[receiver?.chatID],
     );
     const dispatch = useDispatch();
-    useFetchMessagesHook();
     const [attchment, setAttchment] = useState(null);
     const [dummyMessage, setDummyMessage] = useState();
+    const [loader, setLoader] = useState(false);
+    useFetchMessagesHook();
+    // console.log(receiver)
+
+    const profileClickHandler = () => {
+        setMainViewForMobile("UserOrGroupProfile");
+        setRightComponent("UserOrGroupProfile");
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -52,7 +67,7 @@ const ConversationBox = () => {
     const handleTyping = (e) => {
         // e.preventDefault()
         setNewMessage(e.target.value);
-        if (receiver?.chatID) {
+        if (receiver?.chatID && !receiver.isGroupChat) {
             socket.current.emit("user_typing_status", {
                 chatID: receiver?.chatID,
                 receiverID: receiver?.participant._id,
@@ -77,6 +92,7 @@ const ConversationBox = () => {
 
     const sendMessage = async (e) => {
         e.preventDefault();
+        // console.log("receiver  ===>",receiver)
 
         if (isRequestPending) return;
         isRequestPending = true;
@@ -84,7 +100,7 @@ const ConversationBox = () => {
         let chatID = receiver?.chatID;
         let createdChat;
         const content = { type: "text", message: newMessage };
-        setDummyMessage({content:content})
+        setDummyMessage({ content: content });
 
         try {
             if (!chatID) {
@@ -104,45 +120,69 @@ const ConversationBox = () => {
                     },
                     { withCredentials: true },
                 );
-
+                // console.log(response)
                 createdChat = response.data?.chat;
                 chatID = createdChat?.chatID;
 
                 setReceiver(createdChat);
                 dispatch(updateChat(createdChat));
-            }
+                // console.log("createdChat",createdChat)
 
+                socket.current.emit("add_chat", {
+                    createdChat: {
+                        ...createdChat,
+                        participant: {
+                            _id: user._id,
+                            name: user.name,
+                            profileImage: user.profileImage,
+                            about: user.about,
+                        },
+                    },
+                    receiverID: receiver.entityType == "user" && receiver._id,
+                });
+            }
             if (chatID) {
-                const updatedLastMessage = await axios.post(
+                const updatedChat = await axios.post(
                     `${API_URL}/chat/updateChat`,
                     { chatID, content },
                     { withCredentials: true },
                 );
+                console.log("updatedChat", receiver?.isGroupChat);
                 const message = await axios.post(
                     `${API_URL}/message/createMessage`,
                     {
                         chatID,
                         senderID: user._id,
-                        receiverID: receiver?.participant?._id,
-                        isGroupMessage: receiver?.isGroupChat,
+                        receiverID: receiver?.participant?._id || receiver._id,
+                        isGroupMessage: createdChat?.isGroupChat || receiver?.isGroupChat,
                         groupID: receiver?.group?._id,
                         content,
                     },
                     { withCredentials: true },
                 );
-                setDummyMessage("")
+                // console.log(message);
+                setDummyMessage("");
                 setNewMessage("");
 
-                // console.log(message.data)
-                // console.log(updatedLastMessage.data)
-                socket.current.emit("send_message", {
-                    updatedChat: {
-                        lastMessage: updatedLastMessage.data.lastMessage,
-                        _id: chatID,
-                    },
-                    newMessage: message.data.formattedMessage,
-                    receiverID: receiver?.participant?._id,
-                });
+                if (receiver?.group?._id) {
+                    socket.current.emit("group_message", {
+                        updatedChat: {
+                            lastMessage: updatedChat?.data?.lastMessage,
+                            _id: chatID,
+                        },
+                        groupID: receiver.group._id,
+                        newMessage: message?.data?.formattedMessage,
+                    });
+                } else {
+                    socket.current.emit("send_message", {
+                        updatedChat: {
+                            lastMessage: updatedChat?.data?.lastMessage,
+                            _id: chatID,
+                        },
+                        newMessage: message.data.formattedMessage,
+                        receiverID: receiver?.participant?._id || receiver._id,
+                    });
+                }
             }
         } catch (error) {
             console.error("Error creating chat:", error);
@@ -178,27 +218,37 @@ const ConversationBox = () => {
                         className="flex justify-between items-center p-4 pl-0 md:pl-4"
                     >
                         <div className="flex items-center gap-2">
-                        <FontAwesomeIcon icon={faChevronLeft} className="md:hidden h-[20px] w-[20px] cursor-pointer" onClick={()=>setMainViewForMobile("menuScreen")}/>
+                            <FontAwesomeIcon
+                                icon={faChevronLeft}
+                                className="md:hidden h-[20px] w-[20px] cursor-pointer"
+                                onClick={() =>
+                                    setMainViewForMobile("menuScreen")
+                                }
+                            />
                             <img
                                 src={
-                                    chatUser
-                                        ? chatUser.participant?.profileImage
-                                        : receiver?.profileImage
+                                    chatUser?.isGroupChat
+                                        ? chatUser.group?.profileImage
+                                        : chatUser?.participant?.profileImage ||
+                                          receiver?.profileImage
                                 }
                                 alt="Friend Avatar"
-                                className="w-10 h-10 rounded-full mr-4"
+                                className="w-10 h-10 rounded-full mr-4 cursor-pointer"
+                                onClick={profileClickHandler}
                             />
                             <div>
                                 <h4 className="font-bold">
-                                    {chatUser
-                                        ? chatUser?.participant?.name
-                                        : receiver?.name}
+                                    {chatUser?.isGroupChat
+                                        ? chatUser?.group?.name
+                                        : chatUser?.participant?.name ||
+                                          receiver?.name}
                                 </h4>
                                 <p
                                     className="text-sm text-green-700"
                                     // style={{ color: theme.primary }}
                                 >
-                                    {chatUser && chatUser?.participant?.status}
+                                    {!chatUser?.isGroupChat &&
+                                        chatUser?.participant?.status}
                                 </p>
                             </div>
                         </div>
@@ -215,75 +265,93 @@ const ConversationBox = () => {
                     {/* Message Area */}
                     <div className="flex-grow p-4 overflow-y-auto transition-all duration-300 scrollable-for-chat">
                         {/* Render messages only if they exist */}
-                        {
-  messages && messages.length > 0 ? (
-    messages.map((message, idx) => (
-      <React.Fragment key={idx}>
-        {message?.content?.type === "text" && (
-          <MessageBox
-            receiver={receiver}
-            message={message}
-            theme={theme}
-          />
-        )}
-        {message?.content?.type === "image" && (
-          <ImageBox
-            receiver={receiver}
-            message={message}
-            theme={theme}
-          />
-        )}
-        {message?.content?.type === "audio" && (
-          <VoiceNoteBox
-            receiver={receiver}
-            message={message}
-            theme={theme}
-          />
-        )}
-        {message?.content?.type === "pdf" && (
-          <FileBox
-            receiver={receiver}
-            message={message}
-            theme={theme}
-          />
-        )}
-      </React.Fragment>
-    ))
-  ) : receiver?.chatID ? (
-    <div className="flex w-full h-full items-center justify-center">
-      <SpinnerLoader />
-    </div>
-  ) : (
-    <div className="flex w-full h-full items-center justify-center">
-      <p>No message yet</p>
-    </div>
-  )
-}
-
-                        {dummyMessage && dummyMessage?.content?.type=="text" && (
-                            <MessageBox
-                                message={{sender:{_id:user._id},...dummyMessage}}
-                                theme={theme}
-                                waite={true}
-                            />
+                        {messages && messages.length > 0 ? (
+                            messages.map((message, idx) => (
+                                <React.Fragment key={idx}>
+                                    {message?.content?.type === "text" && (
+                                        <MessageBox
+                                            receiver={receiver}
+                                            message={message}
+                                            theme={theme}
+                                        />
+                                    )}
+                                    {message?.content?.type === "image" && (
+                                        <ImageBox
+                                            receiver={receiver}
+                                            message={message}
+                                            theme={theme}
+                                        />
+                                    )}
+                                    {message?.content?.type === "audio" && (
+                                        <VoiceNoteBox
+                                            receiver={receiver}
+                                            message={message}
+                                            theme={theme}
+                                        />
+                                    )}
+                                    {message?.content?.type === "pdf" && (
+                                        <FileBox
+                                            receiver={receiver}
+                                            message={message}
+                                            theme={theme}
+                                        />
+                                    )}
+                                </React.Fragment>
+                            ))
+                        ) : receiver?.lastMessage?.message != null ? (
+                            <div className="flex w-full h-full items-center justify-center">
+                                <SpinnerLoader />
+                            </div>
+                        ) : (
+                            <div className="flex w-full h-full items-center justify-center">
+                                <p>No message yet</p>
+                            </div>
                         )}
-                        {dummyMessage && dummyMessage?.content?.type=="image" && (<ImageBox
-                                    
-                                    message={{sender:{_id:user._id},...dummyMessage}}
+
+                        {dummyMessage &&
+                            dummyMessage?.content?.type == "text" && (
+                                <MessageBox
+                                    message={{
+                                        sender: { _id: user._id },
+                                        ...dummyMessage,
+                                    }}
                                     theme={theme}
                                     waite={true}
-                                    />)}
-                                {dummyMessage && dummyMessage?.content?.type=="audio" && (<VoiceNoteBox
-                                    
-                                    message={{sender:{_id:user._id},...dummyMessage}}
+                                />
+                            )}
+                        {dummyMessage &&
+                            dummyMessage?.content?.type == "image" && (
+                                <ImageBox
+                                    message={{
+                                        sender: { _id: user._id },
+                                        ...dummyMessage,
+                                    }}
                                     theme={theme}
                                     waite={true}
-                                    />)}
-                                {dummyMessage && dummyMessage?.content?.type=="pdf" && (<FileBox
-                                    message={{sender:{_id:user._id},...dummyMessage}}
+                                />
+                            )}
+                        {dummyMessage &&
+                            dummyMessage?.content?.type == "audio" && (
+                                <VoiceNoteBox
+                                    message={{
+                                        sender: { _id: user._id },
+                                        ...dummyMessage,
+                                    }}
                                     theme={theme}
                                     waite={true}
-                                    />)}
+                                />
+                            )}
+                        {dummyMessage &&
+                            dummyMessage?.content?.type == "pdf" && (
+                                <FileBox
+                                    message={{
+                                        sender: { _id: user._id },
+                                        ...dummyMessage,
+                                    }}
+                                    theme={theme}
+                                    waite={true}
+                                />
+                            )}
 
                         {/* This ref will be used to scroll to the bottom */}
                         <div ref={messageEndRef}></div>

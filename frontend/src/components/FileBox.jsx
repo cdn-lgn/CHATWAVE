@@ -22,17 +22,22 @@ const FileBox = ({ message, theme, receiver, waite }) => {
       {/* If the sender is not the user, display receiver's profile image */}
       {!isUser && (
         <img
-          src={!message?.isGroupMessage && receiver?.participant?.profileImage}
+          src={message?.isGroupMessage ? message?.sender?.profileImage : receiver?.participant?.profileImage}
           alt="Friend Avatar"
           className="w-8 h-8 rounded-full mr-2"
         />
       )}
 
       <div
-        className={`relative w-2/3 md:w-1/2 flex items-center justify-center rounded-lg border-2 ${isUser ? "ml-auto" : "mr-auto"}`}
-        style={{ borderColor: theme.button }}
+        className={`relative w-2/3 md:w-1/2 flex items-start justify-center rounded-lg flex-col`}
       >
-        <div className="flex items-center justify-center w-full p-2 gap-2">
+      {!isUser && message.isGroupMessage && (
+          <p className="text-sm font-semibold text-gray-500 mb-1">
+            {message?.sender?.name}
+          </p>
+        )}
+        <div className="flex items-center justify-center w-full p-2 gap-2 rounded-lg border-2"
+        style={{ borderColor: theme.button }}>
           <FontAwesomeIcon
             icon={faFilePdf}
             style={{

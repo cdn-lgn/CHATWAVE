@@ -51,13 +51,26 @@ export const SocketProvider = ({ children }) => {
             });
 
             socket.current.on(
-                "receive_message",
+                "receive_group_message",
                 ({ updatedChat, newMessage }) => {
-                    // console.log(newMessage,updatedChat)
+                    // console.log(updatedChat)
                     dispatch(addMessageToChat(newMessage));
                     dispatch(updateChat(updatedChat));
                 },
             );
+            socket.current.on(
+                "receive_message",
+                ({ updatedChat, newMessage }) => {
+                    // console.log(updatedChat)
+                    dispatch(addMessageToChat(newMessage));
+                    dispatch(updateChat(updatedChat));
+                },
+            );
+            socket.current.on("add_chat",({createdChat})=>{
+                console.log(createdChat)
+                dispatch(updateChat(createdChat))
+            })
+
             // socket.current.on("message_delivered", (data) => console.log("delivered"));
             socket.current.on("connect_error", (err) => {
                 console.error("Socket connection error:", err);

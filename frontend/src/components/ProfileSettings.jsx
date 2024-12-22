@@ -92,12 +92,12 @@ const ProfileSettings = () => {
 
     return (
         <div
-            className="flex h-full items-center justify-start md:flex-col w-full scrollable-container overflow-auto"
+            className="flex items-start justify-start flex-col h-full w-full"
             style={{ backgroundColor: theme.secondary }}
         >
             <div className="w-full">
                 <main className="w-full">
-                    <div className="py-2">
+                    <div>
                         <div
                             className="w-full px-6 pb-10 rounded-lg"
                             style={{ backgroundColor: theme.background }}

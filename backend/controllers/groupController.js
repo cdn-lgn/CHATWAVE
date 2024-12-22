@@ -1,7 +1,49 @@
 import imageKit from "../config/imagekit.js";
 import User from "../models/userSchema.js";
 import Group from "../models/groupSchema.js"; // Ensure the Group model is imported
-import { addToGroupChat,removeFromGroupChat } from "./chatController.js"; // Import createChat function
+import { createAndAddToGroupChat,removeFromGroupChat } from "./chatController.js"; // Import createChat function
+
+
+export const fetchAllGroups = async(req,res)=>{
+    try {
+        const userID = req.user.id
+
+        const allGroups = await Group.find({owner:userID}).populate("owner","name profileImage _id")
+
+        res.status(200).json({
+          message: "success",
+          success: true,
+          allGroups
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "failed",
+            success: false,
+        });
+    }
+}
+
+export const fetchGroup = async(req,res)=>{
+    try {
+        const {groupID} = req.body
+
+        const allGroups = await Group.findById().populate("owner","name profileImage _id")
+
+        res.status(200).json({
+          message: "success",
+          success: true,
+          group
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "failed",
+            success: false,
+        });
+    }
+}
+
 
 export const createGroup = async (req, res) => {
     try {
@@ -40,20 +82,18 @@ export const createGroup = async (req, res) => {
         });
 
         // Create a chat for the group and add the owner as a participant
-        const chat = await addToGroupChat(group._id, req.user.id); // Assuming createChat handles chat creation
-        console.log(chat)
+        const chat = await createAndAddToGroupChat(group._id, req.user.id); // Add owner to group chat
+        console.log(chat);
+        
+        // Save the group with the chat ID
+        group.chatID = chat._id;
         await group.save();
-        group.chatID = chat._id; // Save the chat ID to the group
 
-        console.log("======>",group)
-        console.log("======>",chat)
-
-        // Respond with the created group
         return res.status(201).json({
             message: "Group created successfully!",
             success: true,
-           chat,
-group
+            chat,
+            group,
         });
     } catch (error) {
         console.error(error);
@@ -64,7 +104,7 @@ group
     }
 };
 
-// Add single member (Owner can add members)
+
 export const addSingleMember = async (req, res) => {
     try {
         const { member, groupID } = req.body;
@@ -95,16 +135,15 @@ export const addSingleMember = async (req, res) => {
         group.members.push(member);
         await group.save();
 
-        // Optionally add the member to the group chat if necessary
-        // Assuming there's a function `addToGroupChat` that handles this.
-        await addToGroupChat(group.chatID, member); // If `addToGroupChat` needs the group chat ID
+        // Add member to the group chat
+        await createAndAddToGroupChat(group._id, member); // Add to group chat
 
         res.status(200).json({
             message: "Member added successfully and added to the group chat.",
             success: true,
         });
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
         res.status(500).json({
             message: "Failed to add member",
             success: false,
@@ -112,7 +151,7 @@ export const addSingleMember = async (req, res) => {
     }
 };
 
-// Remove single member (Owner can remove members)
+
 export const removeSingleMember = async (req, res) => {
     try {
         const { member, groupID } = req.body;
@@ -144,7 +183,7 @@ export const removeSingleMember = async (req, res) => {
         await group.save();
 
         // Now, remove this member from the group chat
-        await removeFromGroupChat(group.chatID, member); // Assuming removeFromGroupChat uses the chatID
+        await removeFromGroupChat(group._id, member); // Remove from group chat
 
         res.status(200).json({
             message: "Member removed successfully and removed from the group chat.",
@@ -158,6 +197,7 @@ export const removeSingleMember = async (req, res) => {
         });
     }
 };
+
 
 // Get all group members
 export const getGroupMembers = async (req, res) => {
@@ -185,5 +225,22 @@ export const getGroupMembers = async (req, res) => {
             message: "Failed to fetch group members",
             success: false,
         });
+    }
+};
+
+
+export const getGroupMembersForMessage = async (groupID) => {
+    try {
+        const group = await Group.findById(groupID);
+        if (!group) {
+            console.log("Group not found");
+            return [];
+        }
+        const memberIds = group.members;
+        console.log("Member IDs: ", memberIds);
+        return memberIds;
+    } catch (error) {
+        console.log("Error fetching group members: ", error);
+        return [];
     }
 };

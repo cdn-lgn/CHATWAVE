@@ -69,7 +69,6 @@ setMainViewForMobile("settings")
               onClick={() => setMiddleComponent("chatList")}
             />
 
-            {user?.userCreatedGroups !=false && (
               <FontAwesomeIcon
                 icon={faUsersGear}
                 className="text-xl cursor-pointer p-3 rounded-full transition-all duration-300"
@@ -80,7 +79,6 @@ setMainViewForMobile("settings")
                 }
                 onClick={() => setMiddleComponent("groupList")}
               />
-            )}
 
            {/* <FontAwesomeIcon
               icon={faPhone}
@@ -117,7 +115,7 @@ setMainViewForMobile("settings")
   if (width <= 768) {
     return (
       <div
-        className="flex items-center justify-center w-full rounded-b-xl"
+        className="flex items-center justify-center w-full md:rounded-l-lg rounded-b-lg"
         style={{ backgroundColor: theme.background }}
       >
         <div className="flex w-full px-3 py-2 items-center justify-between">
@@ -166,7 +164,7 @@ setMainViewForMobile("settings")
   if (width <= 768)
     return (
       <div
-        className="flex items-center justify-center w-full rounded-r-xl"
+        className="flex items-center justify-center w-full rounded-t-lg"
         style={{ backgroundColor: theme.background }}
       >
         <div className="w-full flex items-center justify-between px-4 py-1">
@@ -180,7 +178,6 @@ setMainViewForMobile("settings")
             }
             onClick={() => setMiddleComponent("chatList")}
           />
-          {user?.userCreatedGroups && (
             <FontAwesomeIcon
               icon={faUsersGear}
               className="text-xl cursor-pointer py-3 px-6 rounded-full transition-all duration-300"
@@ -191,8 +188,7 @@ setMainViewForMobile("settings")
               }
               onClick={() => setMiddleComponent("groupList")}
             />
-          )}
-
+            
           {/*<FontAwesomeIcon
             icon={faPhone}
             className="text-xl cursor-pointer py-3 px-6 rounded-full transition-all duration-300"

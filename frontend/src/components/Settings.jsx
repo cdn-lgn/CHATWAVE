@@ -29,8 +29,8 @@ const Settings = () => {
   const handleToggleChange3 = () => setIsChecked3(prev => !prev);
 
   return (
-    <div className="w-full rounded-lg rounded-r-none py-2 overflow-auto" style={{ backgroundColor: theme.secondary,color:theme.text }}>
-      <div className="rounded-lg rounded-r-none w-full px-6 pb-8" style={{ backgroundColor: theme.background }}>
+    <div className="w-full items-start justify-start h-full rounded-lg overflow-hidden" style={{ backgroundColor: theme.secondary,color:theme.text }}>
+      <div className="w-full px-6 pb-8 rounded-lg" style={{ backgroundColor: theme.background }}>
         <h2 className="text-2xl font-bold sm:text-xl" style={{ color: theme.text }}>
           Other settings
         </h2>

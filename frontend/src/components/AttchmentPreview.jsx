@@ -58,15 +58,25 @@ const AttachmentPreview = ({ attchment, setAttchment, setDummyMessage }) => {
 				setDummyMessage(""); // Clear the dummy message
 				setAttchment(null); // Clear the attachment preview
 
-				// Emit the socket event to notify the receiver
-				socket.current.emit("send_message", {
-					updatedChat: {
-						lastMessage: response.data.formattedMessage,
-						_id: chatID,
-					},
-					newMessage: response.data.formattedMessage,
-					receiverID: receiver?.participant?._id,
-				});
+				if (receiver?.group?._id) {
+                    socket.current.emit("group_message", {
+                        // updatedChat: {
+                        //     lastMessage: updatedChat?.data?.lastMessage,
+                        //     _id: chatID,
+                        // },
+                        groupID: receiver?.group?._id,
+                        newMessage: response.data.formattedMessage,
+                    });
+                } else {
+                    socket.current.emit("send_message", {
+                        // updatedChat: {
+                        //     lastMessage: updatedChat?.data?.lastMessage,
+                        //     _id: chatID,
+                        // },
+                        newMessage: response.data.formattedMessage,
+                        receiverID: receiver?.participant?._id,
+                    });
+                }
 			}
 		} catch (error) {
 			console.error("Error sending file:", error);

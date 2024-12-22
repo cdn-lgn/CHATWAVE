@@ -12,9 +12,8 @@ import chatRoute from "./routes/chatRoute.js";
 import messageRoute from "./routes/messageRoute.js";
 import { Server } from "socket.io";
 import { ioAuthMiddleware } from "./middleware/ioAuthMiddleware.js";
-import { createChat, updateChat } from "./controllers/chatController.js";
-import { createMessage } from "./controllers/messageController.js";
 import User from "./models/userSchema.js";
+import { getGroupMembersForMessage } from "./controllers/groupController.js";
 
 dotenv.config();
 
@@ -39,13 +38,10 @@ app.use(
     }),
 );
 
-// Log requests (development only)
-if (process.env.NODE_ENV === "development") {
-    app.use((req, res, next) => {
-        console.log(`${req.method} ${req.url}`);
-        next();
-    });
-}
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
 
 // Routes
 app.use("/api/user", userAuthRoute);
@@ -81,6 +77,33 @@ io.on("connection", async (socket) => {
             socket.to(receiverSocketId).emit("user_typing_status", data);
         });
 
+        socket.on(
+            "group_message",
+            async ({ updatedChat, groupID, newMessage }) => {
+                try {
+                    const memberIds = await getGroupMembersForMessage(groupID);
+                    memberIds.forEach((memberId) => {
+                        const userSocket = onlineUsers.get(memberId.toString());
+                        if (userSocket) {
+                            io.to(userSocket.socketId).emit(
+                                "receive_group_message",
+                                {updatedChat,newMessage },
+                            );
+                        }
+                    });
+
+                    console.log("Message sent to group members!");
+                } catch (error) {
+                    console.log("Error sending group message: ", error);
+                }
+            },
+        );
+
+        socket.on("add_chat", ({ createdChat, receiverID }) => {
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            io.to(receiverSocketId).emit("add_chat", { createdChat });
+        });
+
         socket.on("send_message", async (data) => {
             try {
                 const { updatedChat, newMessage, receiverID } = data;
@@ -93,7 +116,7 @@ io.on("connection", async (socket) => {
                         newMessage,
                     });
                 }
-                socket.emit("receive_message", {updatedChat,newMessage});
+                socket.emit("receive_message", { updatedChat, newMessage });
                 // socket.emit("message_delivered");
             } catch (err) {
                 console.error("Error in send_message event:", err.message);

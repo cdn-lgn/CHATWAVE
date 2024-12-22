@@ -1,6 +1,9 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import axios from "axios";
 import { useSelector } from "react-redux";
 import { userContext } from "../context/userContext";
+
+const API_URL = import.meta.env.VITE_USER_API;
 
 const GroupListBox = () => {
 	const {
@@ -10,7 +13,9 @@ const GroupListBox = () => {
 		setMainViewForMobile,
 		setGroupForEdit,
 	} = useContext(userContext);
-	const groupList = useSelector((state) => state.user.user?.userCreatedGroups);
+
+	const [groupList, setGroupList] = useState([]);
+
 	const handleClickOnGroup = ({ group }) => {
 		console.log(group);
 		setRightComponent("GroupSettings");
@@ -18,17 +23,33 @@ const GroupListBox = () => {
 		setGroupForEdit(group);
 	};
 
+	useEffect(() => {
+		const fetchGroups = async () => {
+			const allGroups = await axios.get(`${API_URL}/groups/fetchGroups`, {
+				withCredentials: true,
+			});
+			// console.log(allGroups.data.allGroups);
+			setGroupList(allGroups.data.allGroups);
+		};
+		fetchGroups();
+		return () => {
+			setGroupList([]);
+		};
+	}, []);
+
 	return (
 		<div
-			style={{ backgroundColor: theme.background }}
-			className={`p-4 h-full relative flex flex-col gap-3 ${width <= 768 ? "min-w-full" : "w-1/3"}`}
+			style={{ backgroundColor: theme.background,color:theme.text }}
+			className={`rounded-lg p-4 h-full relative flex flex-col gap-3 ${width <= 768 ? "min-w-full" : "w-1/3"}`} 
 		>
-			{groupList &&
+		<h3>My Groups</h3>
+			{groupList ? (
 				Object.values(groupList).map((group, index) => (
 					<div
 						className="flex items-center gap-4 w-full rounded-lg cursor-pointer"
 						style={{ background: theme.secondry }}
 						onClick={() => handleClickOnGroup({ group })}
+						key={index}
 					>
 						{/* Profile Image */}
 						<img
@@ -55,7 +76,10 @@ const GroupListBox = () => {
 							</div>
 						</div>
 					</div>
-				))}
+				))
+			) : (
+				<p>no group created yet by you</p>
+			)}
 		</div>
 	);
 };

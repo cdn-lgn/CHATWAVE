@@ -1,9 +1,12 @@
 import { useState, useContext } from "react";
+import {useDispatch} from "react-redux"
 import axios from "axios"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { userContext } from "../context/userContext";
 import { SpinnerLoader } from './Loader';
+import { updateChat } from '../redux/chatListSlice';
+import { addGroupToUser } from '../redux/authUserSlice';
 
 const createGroupUrl = `${import.meta.env.VITE_USER_API}/groups/createGroup`;
 
@@ -13,6 +16,7 @@ const CreateNewGroupBox = ({setNewGroupTab}) => {
 	const [description, setDescription] = useState("");
 	const [profileImage, setProfileImage] = useState(null);
 	const [loading,setLoading] = useState(false)
+	const dispatch = useDispatch()
 
 	const handlePhotoChange = (e) => {
 		const selectedFile = e.target.files[0];
@@ -37,7 +41,9 @@ const CreateNewGroupBox = ({setNewGroupTab}) => {
 				headers: { "Content-Type": "multipart/form-data" },
 			});
 
-			console.log("Group Created:", response.data);
+			// console.log("Group Created:", response.data);
+			dispatch(updateChat(response.data.chat))
+			dispatch(addGroupToUser(response.data.group))
 			setNewGroupTab(false)
 		} catch (error) {
 			console.error("Error creating group:", error.message);

@@ -14,15 +14,20 @@ const VoiceNoteBox = ({ message, theme, receiver, waite }) => {
       {/* If the sender is not the user, display receiver's profile image */}
       {!isUser && (
         <img
-          src={!message?.isGroupMessage && receiver?.participant?.profileImage}
+          src={message?.isGroupMessage ? message?.sender?.profileImage : receiver?.participant?.profileImage}
           alt="Friend Avatar"
           className="w-8 h-8 rounded-full mr-2"
         />
       )}
 
       {/* Voice note container */}
-      <div className={`relative w-2/3 md:w-1/2 flex items-center justify-center rounded-lg border-2 ${isUser ? "ml-auto" : "mr-auto"}`} style={{borderColor:theme.button}} >
-        <div className="audio-container w-full relative ">
+      <div className={`relative w-2/3 md:w-1/2 flex items-start flex-col justify-center rounded-lg ${isUser ? "ml-auto" : "mr-auto"}`}>
+      {!isUser && message.isGroupMessage && (
+          <p className="text-sm font-semibold text-gray-500 mb-1">
+            {message?.sender?.name}
+          </p>
+        )}
+        <div className="audio-container w-full relative  border-2 rounded-lg"  style={{borderColor:theme.button}} >
           <p
             style={{ color: theme.text }}
             className="whitespace-nowrap overflow-hidden text-ellipsis"

@@ -33,7 +33,7 @@ const ChatListBox = () => {
   };
 
   // Filter the chat list based on the search term
-  const filteredChatList = Object.values(chatList)?.filter(chat => chat?.participant?.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredChatList = Object.values(chatList)?.filter(chat => chat?.participant?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || chat?.group?.name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
 
   // Close the dropdown if clicked outside
@@ -54,7 +54,7 @@ const ChatListBox = () => {
   return (
     <div
       style={{ backgroundColor: theme.background }}
-      className={`p-4 h-full relative z-10 ${width <= 768 ? "min-w-full" : "w-1/3"}`}
+      className={`p-4 h-full md:h-dvh relative z-10 ${width <= 768 ? "min-w-full" : "w-1/3"} rounded-lg`}
     >
       {/* Search Bar */}
       <div className="relative mb-4">
@@ -78,7 +78,7 @@ const ChatListBox = () => {
       </div>
 
       {/* Chat List */}
-      <div className="space-y-3">
+      <div className="space-y-3 ">
         {filteredChatList?.length > 0 ? (
           filteredChatList?.map((chat, index) => (
             <UserGroupCardForList

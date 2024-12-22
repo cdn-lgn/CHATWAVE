@@ -56,8 +56,6 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Fetch groups created by the user
-    const groupsCreatedByUser = await Group.find({ owner: user._id }).lean(); // Convert to plain objects
 
     // Generate token
     const token = generateToken(user._id);
@@ -71,7 +69,6 @@ export const login = async (req, res) => {
     const userObject = user.toObject();
     delete userObject.password;
 
-    userObject.userCreatedGroups = groupsCreatedByUser;
 
     res.status(200).json({
       message: "Login successful",

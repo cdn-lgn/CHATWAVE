@@ -11,6 +11,7 @@ import ProfileSettings from "../components/ProfileSettings";
 import Settings from "../components/Settings";
 import { SocketContext } from "../context/socketContext";
 import CallScreen from "../components/CallScreen";
+import UserOrGroupProfile from '../components/UserOrGroupProfile';
 
 const Home = () => {
   const {
@@ -27,7 +28,7 @@ const Home = () => {
   if (width > 768) {
     return (
       <div
-        className="w-full h-dvh flex items-start justify-start gap-2 transition-all duration-300"
+        className="w-full h-dvh flex items-center justify-start gap-2 transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
 
@@ -37,6 +38,7 @@ const Home = () => {
             {middleComponent === "callList" && <CallListBox />}
             {rightComponent ==="ConversationBox" && <ConversationBox/>}
             {rightComponent ==="GroupSettings" && <GroupSettings/>}
+            {rightComponent ==="UserOrGroupProfile" && <UserOrGroupProfile/>}
 
             {middleComponent === "settings" && rightComponent ==="settings" && <ProfileSettings />}
             {rightComponent ==="settings" && middleComponent === "settings" && <Settings/>}
@@ -47,7 +49,7 @@ const Home = () => {
   if (width <= 768) {
     return (
       <div
-        className="w-screen min-h-screen flex items-center justify-center gap-1 flex-col transition-all duration-300 p-2 scrollable-for-chat"
+        className="w-screen h-dvh flex items-center justify-center gap-2 flex-col transition-all duration-300 scrollable-for-chat"
         style={{ backgroundColor: theme.secondary }}
       >
         {/*{callStatus != "" && <CallScreen />}*/}
@@ -67,6 +69,7 @@ const Home = () => {
         )}
         {mainViewForMobile === "ConversationBox" && <ConversationBox />}
         {mainViewForMobile === "GroupSettings" && <GroupSettings />}
+        {mainViewForMobile === "UserOrGroupProfile" && <UserOrGroupProfile />}
       </div>
     )
   }

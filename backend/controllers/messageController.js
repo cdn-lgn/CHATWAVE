@@ -8,8 +8,7 @@ export const fetchChatMessages = async (req, res) => {
         const userID = req.user.id;
 
         const allMessages = await Message.find({
-            chat: chatID,
-            $or: [{ sender: userID }, { receiver: userID }],
+            chat: chatID
         })
             .populate("sender", "_id name profileImage")
             .populate("receiver", "_id name profileImage")
@@ -61,7 +60,7 @@ export const createMessage = async (req, res) => {
             groupID,
             content,
         } = req.body;
-// console.log(isGroupMessage)
+console.log("create message receiverID ==> ",isGroupMessage)
         const file = req.file;
 
         let messageObject;
@@ -74,10 +73,10 @@ export const createMessage = async (req, res) => {
                 folder: `chatwave/chats/${chatID}`,
             });
 
-console.log(file)
+// console.log(file)
             // Construct messageObject for group and private messages when file is uploaded
             messageObject = {
-                isGroupMessage : isGroupMessage==="true"? true : false,
+                isGroupMessage : isGroupMessage,
                 chat: chatID,
                 sender: senderID,
                 content: {
@@ -87,7 +86,8 @@ console.log(file)
                 },
             };
 
-            if (messageObject.isGroupMessage) {
+                console.log("groupID  ",messageObject)
+            if (messageObject?.isGroupMessage=="true") {
                 messageObject.group = groupID;
             } else {
                 messageObject.receiver = receiverID;
@@ -95,13 +95,13 @@ console.log(file)
         } else {
             // Handle text message when no file is uploaded
             messageObject = {
-                isGroupMessage : isGroupMessage==="true"? true : false,
+                isGroupMessage : isGroupMessage,
                 chat: chatID,
                 sender: senderID,
                 content,
             };
 
-            if (messageObject.isGroupMessage) {
+            if (messageObject?.isGroupMessage=="true") {
                 messageObject.group = groupID;
             } else {
                 messageObject.receiver = receiverID;

@@ -16,14 +16,19 @@ const ImageBox = ({ message, theme, receiver, waite }) => {
       {/* If the sender is not the user, display receiver's profile image */}
       {!isUser && (
         <img
-          src={!message?.isGroupMessage && receiver?.participant?.profileImage}
+          src={message?.isGroupMessage ? message?.sender?.profileImage : receiver?.participant?.profileImage}
           alt="Friend Avatar"
           className="w-8 h-8 rounded-full mr-2"
         />
       )}
 
       {/* Image container */}
-      <div className={`relative w-1/2 md:w-1/3 flex items-center justify-center ${isUser ? "ml-auto" : "mr-auto"}`}>
+      <div className={`relative w-1/2 md:w-1/3 flex items-start justify-center flex-col ${isUser ? "ml-auto" : "mr-auto"}`}>
+      {!isUser && message.isGroupMessage && (
+          <p className="text-sm font-semibold text-gray-500 mb-1">
+            {message?.sender?.name}
+          </p>
+        )}
         <img
           src={message?.content?.message}
           alt="Shared Content"
