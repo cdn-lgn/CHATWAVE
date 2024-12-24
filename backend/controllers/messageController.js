@@ -1,5 +1,6 @@
 import Message from "../models/messageSchema.js";
 import Chat from "../models/chatSchema.js";
+import imageKit from "../config/imagekit.js";
 
 export const fetchChatMessages = async (req, res) => {
     try {
@@ -7,8 +8,7 @@ export const fetchChatMessages = async (req, res) => {
         const userID = req.user.id;
 
         const allMessages = await Message.find({
-            chat: chatID,
-            $or: [{ sender: userID }, { receiver: userID }],
+            chat: chatID
         })
             .populate("sender", "_id name profileImage")
             .populate("receiver", "_id name profileImage")
@@ -50,56 +50,98 @@ export const fetchChatMessages = async (req, res) => {
     }
 };
 
-
-export const createMessage = async ({ chatID, senderID, receiverID, isGroupMessage = false, groupID = null, content }) => {
+export const createMessage = async (req, res) => {
     try {
+        const {
+            chatID,
+            senderID,
+            receiverID,
+            isGroupMessage,
+            groupID,
+            content,
+        } = req.body;
+console.log("create message receiverID ==> ",isGroupMessage)
+        const file = req.file;
+
         let messageObject;
 
-        // Create message object based on whether it's a group message or a direct message
-        if (isGroupMessage) {
+        // Handle file upload if present
+        if (file) {
+            const uploadImage = await imageKit.upload({
+                file: file.buffer,
+                fileName: file.originalname,
+                folder: `chatwave/chats/${chatID}`,
+            });
+
+// console.log(file)
+            // Construct messageObject for group and private messages when file is uploaded
             messageObject = {
-                isGroupMessage: true,
-                group: groupID,
+                isGroupMessage : isGroupMessage,
+                chat: chatID,
                 sender: senderID,
-                content: content,
-                chat: chatID
+                content: {
+                    name: file.originalname,
+                    type:  file.mimetype.split('/')[0]=="application" ? "pdf" : file.mimetype.split('/')[0],
+                    message: uploadImage.url,
+                },
             };
+
+                console.log("groupID  ",messageObject)
+            if (messageObject?.isGroupMessage=="true") {
+                messageObject.group = groupID;
+            } else {
+                messageObject.receiver = receiverID;
+            }
         } else {
+            // Handle text message when no file is uploaded
             messageObject = {
-                isGroupMessage: false,
-                receiver: receiverID,
+                isGroupMessage : isGroupMessage,
+                chat: chatID,
                 sender: senderID,
-                content: content,
-                chat: chatID
+                content,
             };
+
+            if (messageObject?.isGroupMessage=="true") {
+                messageObject.group = groupID;
+            } else {
+                messageObject.receiver = receiverID;
+            }
         }
 
+            // console.log(messageObject)
         // Create the new message in the database
         const newMessage = await Message.create(messageObject);
 
-        // Use find() to get the message with populated fields
+        // Populate the new message with sender, receiver, and group details
         const populatedMessage = await Message.findById(newMessage._id)
             .populate("sender", "_id name profileImage")
             .populate("receiver", "_id name profileImage")
             .populate("group", "_id name profileImage");
 
-        // Return the message in the same format as the fetchChatMessages response
+// console.log(populatedMessage)
+        // Format the response message to be returned
         const formattedMessage = {
             _id: populatedMessage._id,
-            chatID: populatedMessage.chat._id,  // Ensure the chat ID is returned correctly
-            sender: populatedMessage.sender,    // Include the sender data
+            chatID: populatedMessage.chat._id,
+            sender: populatedMessage.sender,
             isGroupMessage: populatedMessage.isGroupMessage,
             content: populatedMessage.content,
             ...(populatedMessage.isGroupMessage
-                ? { group: populatedMessage.group }  // Include group data if it's a group message
-                : { receiver: populatedMessage.receiver }) // Include receiver data if it's a direct message
+                ? { group: populatedMessage.group }
+                : { receiver: populatedMessage.receiver }),
         };
 
-        return formattedMessage;
-
+        // Respond with success and the formatted message
+        res.status(200).json({
+            message: "success",
+            success: true,
+            formattedMessage,
+        });
     } catch (error) {
-        console.log(error);
-        throw new Error("Error creating message");
+        console.error(error.message);
+        res.status(500).json({
+            message: "failed",
+            success: false,
+        });
     }
 };
-

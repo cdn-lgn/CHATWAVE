@@ -1,31 +1,19 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faPhoneAlt,
-    faPhoneSlash,
-    faVolumeUp,
-    faMicrophone,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPhoneAlt, faPhoneSlash, faVolumeUp, faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { SocketContext } from "../context/socketContext";
 
 const CallScreen = () => {
-    const { callStatus, remoteStream, answerCall, endCall } = useContext(SocketContext);
-    const audioRef = useRef(null); // Reference to the audio element
+    const { callStatus, handleAnswerCall, currentUserVideoRef,
+                remoteVideoRef } = useContext(SocketContext);
 
-    // Ensure the remote stream is playing
-    React.useEffect(() => {
-        if (remoteStream && audioRef.current) {
-            audioRef.current.srcObject = remoteStream; // Set remote stream as audio source
-            audioRef.current.play(); // Start playing the remote stream
-        }
-    }, [remoteStream]); // This will run when the remoteStream changes
-
-    const handleAnswer = () => {
-        answerCall();
+    const handleAnswer = async() => {
+        handleAnswerCall();
     };
 
     const handleEndCall = () => {
-        endCall();
+        // Assuming you have a function to handle the end of the call in your context
+        // handleEndCall();
     };
 
     if (callStatus === "sending") {
@@ -46,14 +34,19 @@ const CallScreen = () => {
     }
     if (callStatus === "connected") {
         return (
-            <div className="fixed w-[300px] h-[300px] bg-yellow-300 rounded-xl z-20 bottom-0">
-                {/* Show the audio element */}
-                <audio ref={audioRef} controls autoPlay>
-                    Your browser does not support the audio element.
-                </audio>
-                <FontAwesomeIcon icon={faMicrophone} />
-                <FontAwesomeIcon icon={faVolumeUp} />
-                <FontAwesomeIcon icon={faPhoneSlash} onClick={handleEndCall} />
+            <div className="fixed w-[300px] h-[300px] bg-yellow-300 rounded-xl z-20 bottom-0 bg-yellow-300">
+                <div>
+        <video ref={currentUserVideoRef} />
+      </div>
+      <div>
+        <video ref={remoteVideoRef} />
+      </div>
+
+                <div className="controls">
+                    <FontAwesomeIcon icon={faMicrophone} />
+                    <FontAwesomeIcon icon={faVolumeUp} />
+                    <FontAwesomeIcon icon={faPhoneSlash} onClick={handleEndCall} />
+                </div>
             </div>
         );
     }

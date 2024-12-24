@@ -33,9 +33,9 @@ const Login = () => {
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
-        }
+        },
       );
-
+      console.log(response.data.user);
       dispatch(setUser(response.data.user));
       navigate("/");
     } catch (err) {
@@ -50,10 +50,10 @@ const Login = () => {
     <div className="bg-white text-gray-900 min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center mb-8">
-          <img 
-            src="/chat.png" 
-            alt="CHATWAVE Logo" 
-            className="w-16 h-16 mr-4 rounded-full" 
+          <img
+            src="/chat.png"
+            alt="CHATWAVE Logo"
+            className="w-16 h-16 mr-4 rounded-full"
           />
           <h1 className="text-3xl font-bold text-blue-600">CHATWAVE</h1>
         </div>
@@ -68,8 +68,8 @@ const Login = () => {
 
           <form onSubmit={loginUser} className="space-y-4">
             <div>
-              <label 
-                htmlFor="email" 
+              <label
+                htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Email Address
@@ -86,8 +86,8 @@ const Login = () => {
             </div>
 
             <div>
-              <label 
-                htmlFor="password" 
+              <label
+                htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Password
@@ -107,8 +107,8 @@ const Login = () => {
                   onClick={togglePasswordVisibility}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
-                  <FontAwesomeIcon 
-                    icon={passwordVisible ? faEyeSlash : faEye} 
+                  <FontAwesomeIcon
+                    icon={passwordVisible ? faEyeSlash : faEye}
                   />
                 </button>
               </div>
@@ -129,10 +129,7 @@ const Login = () => {
 
           <p className="text-center mt-4 text-sm text-gray-600">
             Don't have an account?{" "}
-            <a 
-              href="/signup" 
-              className="text-blue-600 hover:underline"
-            >
+            <a href="/signup" className="text-blue-600 hover:underline">
               Signup
             </a>
           </p>

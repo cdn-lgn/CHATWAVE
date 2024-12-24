@@ -18,9 +18,9 @@ const chatListSlice = createSlice({
             state.chatList = {};
         },
         updateChat: (state, action) => {
-            // console.log(action.payload)
             const { _id } = action.payload;
             if (state.chatList[_id]) {
+            // console.log(action.payload)
                 state.chatList[_id].lastMessage = action.payload?.lastMessage;
             } else {
                 state.chatList[_id] = action.payload;
@@ -30,7 +30,7 @@ const chatListSlice = createSlice({
             const { userID, status } = action.payload;
             Object.keys(state.chatList).forEach((chatID) => {
                 const chat = state.chatList[chatID];
-                if (chat.participant._id === userID) {
+                if (chat.participant?._id === userID) {
                     chat.participant.status = status;
                 }
             });

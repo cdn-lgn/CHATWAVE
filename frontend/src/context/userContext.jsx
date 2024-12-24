@@ -10,8 +10,10 @@ const WrapperComponentContext = ({ children }) => {
         return savedTheme ? JSON.parse(savedTheme) : lightTheme;
     });
     const [middleComponent, setMiddleComponent] = useState("chatList");
+    const [rightComponent, setRightComponent] = useState("");
     const [mainViewForMobile, setMainViewForMobile] = useState("menuScreen");
     const [receiver, setReceiver] = useState(null);
+    const [groupForEdit, setGroupForEdit] = useState(null);
     const width = useScreenWidth();
 
     useEffect(() => {
@@ -26,10 +28,12 @@ const WrapperComponentContext = ({ children }) => {
                 width,
                 middleComponent,
                 setMiddleComponent,
+                rightComponent, setRightComponent,
                 mainViewForMobile,
                 setMainViewForMobile,
                 receiver,
                 setReceiver,
+                groupForEdit, setGroupForEdit,
             }}
         >
             {children}

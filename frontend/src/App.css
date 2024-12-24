@@ -1,0 +1,96 @@
+/* Container to wrap everything and provide padding */
+.audio-container {
+  max-width: 400px; /* You can adjust this to fit your needs */
+  margin: 0 auto; /* Center the audio player */
+  padding: 20px;
+  text-align: center;
+}
+
+/* Custom styling for the audio player */
+.audio-player {
+  width: 100%;
+  border-radius: 12px; /* Rounded corners for the audio player */
+  border: none; /* Remove the default border */
+  background-color: #f4f4f4; /* Optional background color */
+  height: 50px; /* You can adjust the height */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Custom controls (Optional: Hide default controls if you want to create custom ones) */
+.audio-player::-webkit-media-controls-panel {
+  background-color: transparent; /* Hide the background */
+}
+.audio-player::-webkit-media-controls-play-button {
+  background-color: transparent; /* Remove background of play button */
+}
+.audio-player::-webkit-media-controls-volume-slider {
+  background-color: transparent; /* Make volume slider look cleaner */
+}
+
+
+
+.switch-container {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.switch {
+  width: 50px;
+  height: 25px;
+  background-color: gray;
+  border-radius: 50px;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.switch.on {
+  background-color: blue;
+}
+
+.slider {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-53%);
+  transition: transform 0.3s ease;
+}
+
+.switch.on .slider {
+  transform: translateY(-53%) translateX(25px);
+}
+
+
+/* Hide the scrollbar but keep the scroll functionality */
+.scrollable-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollable-container {
+  -ms-overflow-style: none;  /* for Internet Explorer 10+ */
+  scrollbar-width: none;      /* for Firefox */
+}
+
+/* Hide the default scrollbar */
+.scrollable-for-chat::-webkit-scrollbar {
+  width: 6px;  /* Adjust the width for a thin scrollbar */
+  height: 6px; /* For horizontal scrollbar (if needed) */
+}
+
+.scrollable-for-chat::-webkit-scrollbar-thumb {
+  background-color: #d1d5db; /* Light gray thumb, change to match your bg color */
+  border-radius: 9999px; /* Make the thumb rounded */
+}
+
+.scrollable-for-chat::-webkit-scrollbar-track {
+  background-color: transparent; /* Transparent track */
+}
+
+.scrollable-for-chat {
+  -ms-overflow-style: none;  /* For Internet Explorer 10+ */
+  scrollbar-width: thin;      /* Firefox: set the scrollbar width to thin */
+  scrollbar-color: #d1d5db transparent; /* Firefox: set thumb and track colors */
+}

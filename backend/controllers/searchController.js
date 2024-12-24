@@ -8,14 +8,12 @@ export const searchAll = async (req, res) => {
 		const users = await User.find({
 			name: { $regex: query, $options: "i" },
 			_id: { $ne: req.user.id },
-		});
-
-		const groups = await Group.find({
-			name: { $regex: query, $options: "i" },
+			hiddenAccount: { $ne: true },
+			BlockedUser: { $ne: req.user.id }
 		});
 
 		res.status(200).json({
-			searchResult: [ ...users, ...groups ],
+			searchResult: [ ...users ],
 			success: true,
 		});
 	} catch (error) {

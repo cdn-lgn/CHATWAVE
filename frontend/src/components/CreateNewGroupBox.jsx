@@ -1,16 +1,22 @@
 import { useState, useContext } from "react";
+import {useDispatch} from "react-redux"
 import axios from "axios"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { userContext } from "../context/userContext";
+import { SpinnerLoader } from './Loader';
+import { updateChat } from '../redux/chatListSlice';
+import { addGroupToUser } from '../redux/authUserSlice';
 
-const createGroupUrl = `${import.meta.env.VITE_USER_API}/group/createGroup`;
+const createGroupUrl = `${import.meta.env.VITE_USER_API}/groups/createGroup`;
 
-const CreateNewGroupBox = () => {
+const CreateNewGroupBox = ({setNewGroupTab}) => {
 	const { theme } = useContext(userContext);
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
 	const [profileImage, setProfileImage] = useState(null);
+	const [loading,setLoading] = useState(false)
+	const dispatch = useDispatch()
 
 	const handlePhotoChange = (e) => {
 		const selectedFile = e.target.files[0];
@@ -21,6 +27,7 @@ const CreateNewGroupBox = () => {
 
 	const createGroup = async (e) => {
 		e.preventDefault();
+		setLoading(true)
 
 		// Prepare FormData
 		const formData = new FormData();
@@ -34,10 +41,16 @@ const CreateNewGroupBox = () => {
 				headers: { "Content-Type": "multipart/form-data" },
 			});
 
-			console.log("Group Created:", response.data);
+			// console.log("Group Created:", response.data);
+			dispatch(updateChat(response.data.chat))
+			dispatch(addGroupToUser(response.data.group))
+			setNewGroupTab(false)
 		} catch (error) {
 			console.error("Error creating group:", error.message);
+		}finally{
+			setLoading(false)
 		}
+
 	};
 
 	return (
@@ -68,6 +81,7 @@ const CreateNewGroupBox = () => {
 					)}
 				</label>
 				<input
+				required
 					type="file"
 					id="profileImage"
 					accept="image/*"
@@ -85,6 +99,7 @@ const CreateNewGroupBox = () => {
 						Group Name
 					</label>
 					<input
+					required
 						type="text"
 						id="name"
 						value={name}
@@ -107,6 +122,7 @@ const CreateNewGroupBox = () => {
 						Description
 					</label>
 					<textarea
+					required
 						id="description"
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
@@ -123,9 +139,10 @@ const CreateNewGroupBox = () => {
 				<button
 					type="submit"
 					className="w-full py-2 rounded-lg text-white"
-					style={{ backgroundColor: theme.button }}
+					style={{ backgroundColor: loading ? theme.background : theme.button}}
+					disabled={loading}
 				>
-					Create Group
+					{loading ? <SpinnerLoader /> : "create Group"}
 				</button>
 			</form>
 		</div>

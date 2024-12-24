@@ -5,7 +5,7 @@ import User from "../models/userSchema.js";
 import Group from "../models/groupSchema.js";
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "2d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET);
 };
 
 export const signUp = async (req, res) => {
@@ -56,8 +56,6 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Fetch groups created by the user
-    const groupsCreatedByUser = await Group.find({ owner: user._id }).lean(); // Convert to plain objects
 
     // Generate token
     const token = generateToken(user._id);
@@ -71,7 +69,6 @@ export const login = async (req, res) => {
     const userObject = user.toObject();
     delete userObject.password;
 
-    userObject.userCreatedGroups = groupsCreatedByUser;
 
     res.status(200).json({
       message: "Login successful",
@@ -99,7 +96,6 @@ export const updateUser = async (req, res) => {
       dataForUpdate.profileImage = uploadedImage.url
     }
 
-
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: dataForUpdate },
@@ -119,6 +115,27 @@ export const updateUser = async (req, res) => {
     });
   }
 };
+
+
+export const hideUser = async(req,res)=>{
+try {
+  const {hideUser} = req.body
+  const userID = req.user.id
+  const update = await User.findByIdAndUpdate(userID,{hiddenAccount:!hideUser},{new:true})
+// console.log(hideUser)
+    res.status(200).json({
+      message: "success",
+      success: true,
+      hiddenAccount:update.hiddenAccount
+    });
+} catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+        message: "failed",
+        success: false,
+    });
+}
+}
 
 // Logout Function
 export const logOut = async (req, res) => {

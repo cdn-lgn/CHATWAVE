@@ -12,9 +12,8 @@ import chatRoute from "./routes/chatRoute.js";
 import messageRoute from "./routes/messageRoute.js";
 import { Server } from "socket.io";
 import { ioAuthMiddleware } from "./middleware/ioAuthMiddleware.js";
-import { createChat, updateChat } from "./controllers/chatController.js";
-import { createMessage } from "./controllers/messageController.js";
 import User from "./models/userSchema.js";
+import { getGroupMembersForMessage } from "./controllers/groupController.js";
 
 dotenv.config();
 
@@ -38,18 +37,15 @@ app.use(
     }),
 );
 
-// Log requests (development only)
-if (process.env.NODE_ENV === "development") {
-    app.use((req, res, next) => {
-        console.log(`${req.method} ${req.url}`);
-        next();
-    });
-}
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
 
 // Routes
 app.use("/api/user", userAuthRoute);
 app.use("/api/userStatus", userStatusRoute);
-app.use("/api/group", groupRoute);
+app.use("/api/groups", groupRoute);
 app.use("/api/search", searchRoute);
 app.use("/api/chat", chatRoute);
 app.use("/api/message", messageRoute);
@@ -80,98 +76,51 @@ io.on("connection", async (socket) => {
             socket.to(receiverSocketId).emit("user_typing_status", data);
         });
 
+        socket.on(
+            "group_message",
+            async ({ updatedChat, groupID, newMessage }) => {
+                try {
+                    const memberIds = await getGroupMembersForMessage(groupID);
+                    memberIds.forEach((memberId) => {
+                        const userSocket = onlineUsers.get(memberId.toString());
+                        if (userSocket) {
+                            io.to(userSocket.socketId).emit(
+                                "receive_group_message",
+                                {updatedChat,newMessage },
+                            );
+                        }
+                    });
+
+                    console.log("Message sent to group members!");
+                } catch (error) {
+                    console.log("Error sending group message: ", error);
+                }
+            },
+        );
+
+        socket.on("add_chat", ({ createdChat, receiverID }) => {
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            io.to(receiverSocketId).emit("add_chat", { createdChat });
+        });
+
         socket.on("send_message", async (data) => {
-            const {
-                senderID,
-                receiverID,
-                chatID,
-                content,
-                isGroupChat,
-                groupID,
-                isGroupMessage,
-            } = data;
-            console.log(data);
             try {
-                let chatObj = await updateChat({
-                    senderID,
-                    receiverID,
-                    isGroupChat,
-                    groupID,
-                    chatID,
-                    content,
-                });
+                const { updatedChat, newMessage, receiverID } = data;
 
-                const messageObj = await createMessage({
-                    chatID,
-                    senderID,
-                    receiverID,
-                    isGroupMessage,
-                    groupID,
-                    content,
-                });
-
-                const incomingData = { chatObj, messageObj };
                 const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
 
                 if (receiverSocketId) {
-                    io.to(receiverSocketId).emit(
-                        "receive_message",
-                        incomingData,
-                    );
+                    io.to(receiverSocketId).emit("receive_message", {
+                        updatedChat,
+                        newMessage,
+                    });
                 }
-
-                socket.emit("receive_message", incomingData);
+                socket.emit("receive_message", { updatedChat, newMessage });
+                // socket.emit("message_delivered");
             } catch (err) {
                 console.error("Error in send_message event:", err.message);
             }
         });
-
-        //=================//
-        // webRTC response start
-        //=================//
-        socket.on("offer", ({ offer, sender, receiverID }) => {
-            const receiverSocketId = onlineUsers.get(receiverID).socketId;
-            console.log("Offer received from", socket.id);
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("incomingCall", {
-                    offer,
-                    sender,
-                    receiverID,
-                });
-            } else {
-                console.log("Receiver not available");
-            }
-        });
-        socket.on("answer", ({ answer, sender, receiverID }) => {
-            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            console.log("Answer received from", socket.id);
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("callAnswered", {
-                    answer,
-                    sender,
-                    receiverID,
-                });
-            } else {
-                console.log("Caller not available");
-            }
-        });
-        socket.on("ice-candidate", ({ candidate, senderID, receiverID }) => {
-            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            console.log("ICE candidate received:", candidate);
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("iceCandidate", { candidate });
-            }
-        });
-        socket.on("endCall", (receiverID) => {
-            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            console.log("Call ended");
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("endCall");
-            }
-        });
-        //=================//
-        // webRTC response end
-        //=================//
 
         socket.on("disconnect", async () => {
             if (userID) {
