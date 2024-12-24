@@ -33,7 +33,7 @@ export const SocketProvider = ({ children }) => {
     // Setup socket connection and event listeners
     useEffect(() => {
         if (user) {
-            socket.current = io("https://fluffy-eureka-wrrrq57wj456f9q5-3000.app.github.dev", {
+            socket.current = io("http://localhost:3000", {
                 transports: ["websocket"],
                 withCredentials: true,
             });
