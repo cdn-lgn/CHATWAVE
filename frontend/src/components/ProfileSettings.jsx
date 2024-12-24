@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { userContext } from "../context/userContext";
-import { useNavigate } from "react-router-dom";
 import { setUser } from "../redux/authUserSlice";
 
 const updateUserUrl = `${import.meta.env.VITE_USER_API}/user/updateUser`;
@@ -18,7 +17,6 @@ const ProfileSettings = () => {
         receiver,
     } = useContext(userContext);
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     // State for form data with only changed fields
     const [formData, setFormData] = useState({});
@@ -92,14 +90,14 @@ const ProfileSettings = () => {
 
     return (
         <div
-            className="flex items-start justify-start flex-col h-full w-full"
+            className="flex items-start justify-start flex-col md:h-dvh w-full overflow-hidden md:overflow-y-scroll scrollable-for-chat"
             style={{ backgroundColor: theme.secondary }}
         >
             <div className="w-full">
                 <main className="w-full">
                     <div>
                         <div
-                            className="w-full px-6 pb-10 rounded-lg"
+                            className="w-full px-6 pb-10 rounded-lg pt-4"
                             style={{ backgroundColor: theme.background }}
                         >
                             <h2

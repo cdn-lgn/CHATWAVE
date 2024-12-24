@@ -13,7 +13,7 @@ const useFetchChatList = () => {
     const fetchChatList = async () => {
         try {
             const response = await axios.get(fetchChatUrl, { withCredentials: true });
-            console.log(response.data)
+            // console.log(response.data)
             dispatch(setChatList(response.data.allChats));
         } catch (error) {
             console.log("Error fetching chat list:", error.message);

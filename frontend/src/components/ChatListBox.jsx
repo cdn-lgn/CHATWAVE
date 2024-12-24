@@ -54,7 +54,7 @@ const ChatListBox = () => {
   return (
     <div
       style={{ backgroundColor: theme.background }}
-      className={`p-4 h-full md:h-dvh relative z-10 ${width <= 768 ? "min-w-full" : "w-1/3"} rounded-lg`}
+      className={`p-4 h-dvh relative z-10 ${width <= 768 ? "min-w-full" : "w-1/3"} rounded-lg`}
     >
       {/* Search Bar */}
       <div className="relative mb-4">

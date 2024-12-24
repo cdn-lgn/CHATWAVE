@@ -5,15 +5,16 @@ import Switch from "./Switch";  // Import the custom switch component
 import { userContext } from "../context/userContext";
 import { updateAccountStatus } from '../redux/authUserSlice';
 import { darkTheme,lightTheme } from '../constants/theme';
+import Warning from "./Warning";
 
 const API_URL = import.meta.env.VITE_USER_API
 
 const Settings = () => {
-  const {theme,setTheme} = useContext(userContext)
+  const {theme,setTheme,confirmation,setConfirmation} = useContext(userContext)
   const user = useSelector(state=>state.user.user)
   const dispatch = useDispatch()
   const [isChecked3, setIsChecked3] = useState(false);
-  console.log("theme ",theme)
+  // console.log("theme ",theme)
 
   const handleHideAccount = async() => {
     try {
@@ -29,8 +30,8 @@ const Settings = () => {
   const handleToggleChange3 = () => setIsChecked3(prev => !prev);
 
   return (
-    <div className="w-full items-start justify-start h-full rounded-lg overflow-hidden" style={{ backgroundColor: theme.secondary,color:theme.text }}>
-      <div className="w-full px-6 pb-8 rounded-lg" style={{ backgroundColor: theme.background }}>
+    <div className="w-full items-start justify-start h-full rounded-lg overflow-x-hidden" style={{ backgroundColor: theme.secondary,color:theme.text }}>
+      <div className="w-full px-6 pb-8 rounded-lg pt-4" style={{ backgroundColor: theme.background }}>
         <h2 className="text-2xl font-bold sm:text-xl" style={{ color: theme.text }}>
           Other settings
         </h2>

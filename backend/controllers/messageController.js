@@ -131,6 +131,8 @@ console.log("create message receiverID ==> ",isGroupMessage)
                 : { receiver: populatedMessage.receiver }),
         };
 
+
+        // console.log("formattedMessage===>",formattedMessage)
         // Respond with success and the formatted message
         res.status(200).json({
             message: "success",

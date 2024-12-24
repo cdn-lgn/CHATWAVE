@@ -131,6 +131,12 @@ setMainViewForMobile("settings")
             className="text-xl mt-2 cursor-pointer"
             style={{ color: theme.primary }}
           />*/}
+          <FontAwesomeIcon
+              icon={faRightFromBracket}
+              className="text-xl cursor-pointer"
+              style={{ color: theme.button }}
+              onClick={handleLogout}
+            />
         </div>
       </div>
     );

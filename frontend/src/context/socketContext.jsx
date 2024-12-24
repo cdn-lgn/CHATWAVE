@@ -15,6 +15,8 @@ import {
 } from "../redux/chatListSlice";
 import { Peer } from "peerjs";
 
+const backendUrl = import.meta.env.VITE_SOCKET_API
+
 export const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
@@ -33,7 +35,7 @@ export const SocketProvider = ({ children }) => {
     // Setup socket connection and event listeners
     useEffect(() => {
         if (user) {
-            socket.current = io("http://localhost:3000", {
+            socket.current = io(`${backendUrl}`, {
                 transports: ["websocket"],
                 withCredentials: true,
             });

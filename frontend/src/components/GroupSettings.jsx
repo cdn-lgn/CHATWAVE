@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { userContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTimes, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTimes, faSearch, faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
 const searchAllUrl = `${import.meta.env.VITE_USER_API}/search/searchAll`;
@@ -140,7 +140,16 @@ const GroupSettings = () => {
         <div className="w-full">
             <main className="w-full">
                 <div>
+                    
                     <div className="w-full px-6 pb-6 rounded-lg" style={{ backgroundColor: theme.background }}>
+                    <FontAwesomeIcon
+                                                                    icon={faChevronLeft}
+                                                                    className="md:hidden pt-4 h-[20px] w-[20px] cursor-pointer"
+                                                                    onClick={() =>
+                                                                        setMainViewForMobile("menuScreen")
+                                                                    }
+                                                                    style={{color:theme.text}}
+                                                                />
                         <h2 className="text-2xl font-bold sm:text-xl" style={{ color: theme.text }}>Group Profile</h2>
                         
                         {/* Group Edit Form (Visible only for the owner) */}

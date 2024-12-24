@@ -12,6 +12,7 @@ import Settings from "../components/Settings";
 import { SocketContext } from "../context/socketContext";
 import CallScreen from "../components/CallScreen";
 import UserOrGroupProfile from '../components/UserOrGroupProfile';
+import Warning from "../components/Warning";
 
 const Home = () => {
   const {
@@ -20,7 +21,8 @@ const Home = () => {
     middleComponent,
     mainViewForMobile,
     setMainViewForMobile,
-    rightComponent
+    rightComponent,
+    confirmation
   } = useContext(userContext); // Access the theme from context
   const navigate = useNavigate();
   const { callStatus } = useContext(SocketContext);
@@ -28,9 +30,10 @@ const Home = () => {
   if (width > 768) {
     return (
       <div
-        className="w-full h-dvh flex items-center justify-start gap-2 transition-all duration-300"
+        className="relative w-full h-dvh overflow-hidden flex items-center justify-start gap-2 transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
+        {confirmation && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}
 
             <Navbar />
             {middleComponent === "chatList" && <ChatListBox />}
@@ -49,10 +52,11 @@ const Home = () => {
   if (width <= 768) {
     return (
       <div
-        className="w-screen h-dvh flex items-center justify-center gap-2 flex-col transition-all duration-300 scrollable-for-chat"
+        className="relavtive w-dwh max-h-dvh flex items-start justify-start gap-2 flex-col overflow-x-hidden transition-all duration-300 scrollable-for-chat"
         style={{ backgroundColor: theme.secondary }}
       >
         {/*{callStatus != "" && <CallScreen />}*/}
+        {confirmation && <Warning setConfirmation={setConfirmation} warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}
         {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />
@@ -62,7 +66,7 @@ const Home = () => {
             <BottomBarForMobile />
           </>
         )}
-        {mainViewForMobile === "settings" && (<div className="w-full min-h-full flex flex-col items-center justify-start gap-1 flex-col transition-all duration-300">
+        {mainViewForMobile === "settings" && (<div className="w-full h-full flex flex-col items-center justify-start gap-1 transition-all duration-300">
             <ProfileSettings />
             <Settings/>
           </div >

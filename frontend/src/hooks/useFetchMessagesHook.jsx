@@ -18,7 +18,7 @@ const useFetchMessagesHook = () => {
         try {
             const chatID = receiver.chatID;
             const response = await axios.get(`${fetchMessagesUrl}/${chatID}`, { withCredentials: true });
-            console.log(response.data.allMessages)
+            // console.log(response.data.allMessages)
             dispatch(setMessages({ messages: response.data.allMessages, chatID }));
         } catch (error) {
             console.error("Error fetching messages:", error);

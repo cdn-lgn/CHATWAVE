@@ -40,7 +40,7 @@ const GroupListBox = () => {
 	return (
 		<div
 			style={{ backgroundColor: theme.background,color:theme.text }}
-			className={`rounded-lg p-4 h-full relative flex flex-col gap-3 ${width <= 768 ? "min-w-full" : "w-1/3"}`} 
+			className={`rounded-lg p-4 h-dvh relative flex flex-col gap-3 ${width <= 768 ? "min-w-full" : "w-1/3"}`} 
 		>
 		<h3>My Groups</h3>
 			{groupList ? (

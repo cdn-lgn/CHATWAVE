@@ -21,7 +21,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: process.env.FRONTEND_URL || "http://localhost:5173",
         credentials: true,
     },
 });
@@ -32,9 +32,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
     cors({
-        // origin: process.env.FRONTEND_URL || "http://localhost:5173",
-        origin: "http://localhost:5173",
+        origin: process.env.FRONTEND_URL || "http://localhost:5173",
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allow methods for CORS
+        allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
     }),
 );
 
@@ -56,6 +57,7 @@ const onlineUsers = new Map();
 io.use(ioAuthMiddleware);
 io.on("connection", async (socket) => {
     try {
+        console.log("Namespace:", socket.nsp.name);
         const userID = socket.user?._id.toString(); // Access the authenticated user
         await User.findByIdAndUpdate(userID, { status: "online" });
         if (!userID) {
@@ -141,7 +143,7 @@ io.on("connection", async (socket) => {
             }
         });
     } catch (err) {
-        console.error("Error during socket connection:", err.message);
+        console.error("Error during socket connection:", err);
     }
 });
 

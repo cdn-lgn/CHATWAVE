@@ -1,20 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useSelector } from "react-redux";
 import { userContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_USER_API;
 
 const UserOrGroupProfile = () => {
-    const { theme, receiver,setReceiver } = useContext(userContext);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [searchResult, setSearchResult] = useState([]);
+    const { theme, receiver,setReceiver,setMainViewForMobile } = useContext(userContext);
     const [members, setMembers] = useState([]);
-    const user = useSelector((state) => state.user.user);
 
-    console.log(receiver)
+    // console.log(receiver)
 
     // Fetch group members when receiver is a group
     useEffect(() => {
@@ -35,35 +31,6 @@ const UserOrGroupProfile = () => {
         }
     };
 
-    // Handle search key press
-    const handleKeyDown = async (event) => {
-        if (event.key === "Enter" && searchQuery.trim() !== "") {
-            try {
-                const response = await axios.get(searchAllUrl, {
-                    params: { query: searchQuery.trim() },
-                    withCredentials: true,
-                });
-                setSearchResult(response.data.searchResult);
-            } catch (error) {
-                console.error("Error fetching search results:", error);
-            }
-        }
-    };
-
-    // Handle adding a new member to the group
-    const addNewMember = async (newMember) => {
-        try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_USER_API}/groups/addMember`, 
-                { groupID: receiver.group._id, member: newMember._id },
-                { withCredentials: true }
-            );
-            console.log("Added new member:", response);
-            setMembers((prevMembers) => [...prevMembers, newMember]);  // Update members in UI
-        } catch (error) {
-            console.error('Error adding new member:', error);
-        }
-    };
 
     // Check if the receiver is a group or user and render accordingly
     if (!receiver) return null; // Handle case when receiver is not available
@@ -74,7 +41,16 @@ const UserOrGroupProfile = () => {
             style={{ backgroundColor: theme.secondary }}
         >
             <div className="w-full rounded-lg"  style={{ backgroundColor: theme.background }}>
+                
                 <main className="w-full">
+                <FontAwesomeIcon
+                                                icon={faChevronLeft}
+                                                className="md:hidden pt-4 pl-4 h-[20px] w-[20px] cursor-pointer"
+                                                onClick={() =>
+                                                    setMainViewForMobile("ConversationBox")
+                                                }
+                                                style={{color:theme.text}}
+                                            />
                     <div className="py-2">
                         <div
                             className="w-full px-6 pb-6"

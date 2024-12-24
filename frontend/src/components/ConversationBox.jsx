@@ -205,7 +205,7 @@ const ConversationBox = () => {
     return (
         <div
             style={{ backgroundColor: theme.background, color: theme.text }}
-            className={`relative flex flex-col h-dvh ${width <= 768 ? "min-w-full" : "w-2/3"}`}
+            className={`relative flex flex-col h-dvh ${width <= 768 ? "w-full max-w-full" : "w-2/3"}`}
         >
             {receiver && (
                 <>
