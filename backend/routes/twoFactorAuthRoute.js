@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.post("/createChallenge-2FA",authMiddleware,registerChallenge)
 router.post("/verifyChallengeResponse-2FA",authMiddleware,verifyRegistration)
-router.get("/createLogin-2FA",loginChallege)
-router.get("/verifyLogin-2FA",loginVerify)
+router.post("/createLogin-2FA",loginChallege)
+router.post("/verifyLogin-2FA",loginVerify)
 
 export default router

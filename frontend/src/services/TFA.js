@@ -7,16 +7,17 @@ export const registerForTFA = async ({ name }) => {
 	try {
 		const requestCallForChallenge = await axios.post(
 			`${API_URL}/TFA/createChallenge-2FA`,
-			name,
+			{name},
 			{ withCredentials: true },
 		);
 		console.log(
 			"requestCallForChallenge.data.options ",
-			requestCallForChallenge.data.options.challenge,
+			requestCallForChallenge.data.options,
 		);
+		
 		const { options } = requestCallForChallenge.data;
 		const responseForChallenge = await startRegistration({
-			optionsJSON: options,
+			optionsJSON: options
 		});
 		console.log("response for challenge ", responseForChallenge);
 
@@ -46,7 +47,7 @@ export const cancelationForTFA = async () => {
 
 export const verificationForTFA = async ({ userId }) => {
 	try {
-		const requestCallForChallenge = await axios.get(
+		const requestCallForChallenge = await axios.post(
 			`${API_URL}/TFA/createLogin-2FA`,
 			{ userId },
 		);
@@ -57,7 +58,7 @@ export const verificationForTFA = async ({ userId }) => {
 		});
 		console.log("authenticationResult ", authenticationResult);
 
-		const verificationResult = await axios.get(
+		const verificationResult = await axios.post(
 			`${API_URL}/TFA/verifyLogin-2FA`,
 			{ credentials: authenticationResult, userId },
 		);

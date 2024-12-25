@@ -14,7 +14,6 @@ const WrapperComponentContext = ({ children }) => {
     const [mainViewForMobile, setMainViewForMobile] = useState("menuScreen");
     const [receiver, setReceiver] = useState(null);
     const [groupForEdit, setGroupForEdit] = useState(null);
-  const [confirmation,setConfirmation] = useState(false)
 
     const width = useScreenWidth();
 
@@ -36,7 +35,7 @@ const WrapperComponentContext = ({ children }) => {
                 receiver,
                 setReceiver,
                 groupForEdit, setGroupForEdit,
-                confirmation,setConfirmation,
+                
             }}
         >
             {children}

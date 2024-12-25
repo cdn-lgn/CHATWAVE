@@ -22,10 +22,8 @@ const Home = () => {
     mainViewForMobile,
     setMainViewForMobile,
     rightComponent,
-    confirmation
   } = useContext(userContext); // Access the theme from context
   const navigate = useNavigate();
-  const { callStatus } = useContext(SocketContext);
 
   if (width > 768) {
     return (
@@ -33,7 +31,6 @@ const Home = () => {
         className="relative w-full h-dvh overflow-hidden flex items-center justify-start gap-2 transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
-        {/*{confirmation && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}*/}
 
             <Navbar />
             {middleComponent === "chatList" && <ChatListBox />}
@@ -55,8 +52,6 @@ const Home = () => {
         className="relavtive w-dwh max-h-dvh flex items-start justify-start gap-2 flex-col overflow-x-hidden transition-all duration-300 scrollable-for-chat"
         style={{ backgroundColor: theme.secondary }}
       >
-        {/*{callStatus != "" && <CallScreen />}*/}
-        {/*{confirmation && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}*/}
         {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />

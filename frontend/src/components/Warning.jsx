@@ -3,8 +3,8 @@ import { userContext } from '../context/userContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWarning,faClose } from '@fortawesome/free-solid-svg-icons'
 
-const Warning = ({warningTitle,warningMessage,next}) => {
-    const {theme,setConfirmation}= useContext(userContext)
+const Warning = ({warningTitle,warningMessage,next,setConfirmation}) => {
+    const {theme}= useContext(userContext)
     const handleConfirmation=()=>{
         try{
 next()
