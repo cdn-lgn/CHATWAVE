@@ -33,7 +33,7 @@ const Home = () => {
         className="relative w-full h-dvh overflow-hidden flex items-center justify-start gap-2 transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
-        {confirmation && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}
+        {/*{confirmation && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}*/}
 
             <Navbar />
             {middleComponent === "chatList" && <ChatListBox />}
@@ -56,7 +56,7 @@ const Home = () => {
         style={{ backgroundColor: theme.secondary }}
       >
         {/*{callStatus != "" && <CallScreen />}*/}
-        {confirmation && <Warning setConfirmation={setConfirmation} warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}
+        {/*{confirmation && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"}/>}*/}
         {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />

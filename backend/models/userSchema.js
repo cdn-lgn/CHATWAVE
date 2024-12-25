@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema(
     hiddenAccount: { type: Boolean,default:false,required:true },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Blocked users
     status: { type: String, default:"offline" },
-    entityType: { type: String, default: "user", immutable: true }
+    entityType: { type: String, default: "user", immutable: true },
+    TFA:{type:Boolean,default:false}
   },
   { timestamps: true }
 );

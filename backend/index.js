@@ -10,12 +10,17 @@ import searchRoute from "./routes/searchRoute.js";
 import groupRoute from "./routes/groupRoute.js";
 import chatRoute from "./routes/chatRoute.js";
 import messageRoute from "./routes/messageRoute.js";
+import TFARoute from "./routes/twoFactorAuthRoute.js";
 import { Server } from "socket.io";
 import { ioAuthMiddleware } from "./middleware/ioAuthMiddleware.js";
 import User from "./models/userSchema.js";
 import { getGroupMembersForMessage } from "./controllers/groupController.js";
+import crypto from 'node:crypto';
 
 dotenv.config();
+if(!globalThis.crypto){
+    globalThis.crypto=crypto
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -51,6 +56,7 @@ app.use("/api/groups", groupRoute);
 app.use("/api/search", searchRoute);
 app.use("/api/chat", chatRoute);
 app.use("/api/message", messageRoute);
+app.use("/api/TFA", TFARoute);
 
 const onlineUsers = new Map();
 
