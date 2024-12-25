@@ -24,7 +24,9 @@ const authUserSlice = createSlice({
             }
             state.user.userCreatedGroups.push(action.payload);
         },
-        // Reducer function to reset the user (set it to null)
+        updateTFAStatus:(state,action)=>{
+            state.user.TFA = action.payload;
+        },
         resetUser: (state) => {
             state.user = null; // Reset the user to null
             state.lastUpdated = null;
@@ -32,7 +34,7 @@ const authUserSlice = createSlice({
     },
 });
 
-export const { setUser, resetUser, updateAccountStatus, addGroupToUser } =
+export const { setUser, resetUser, updateAccountStatus, addGroupToUser,updateTFAStatus } =
     authUserSlice.actions;
 
 export default authUserSlice.reducer;

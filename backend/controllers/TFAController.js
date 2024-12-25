@@ -4,6 +4,9 @@ import {
 	generateAuthenticationOptions,
 	verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
+import User from '../models/userSchema.js'
+import TwoFactorAuth from '../models/authSchema.js'
+
 
 let challengeStore = [];
 
@@ -15,7 +18,7 @@ export const registerChallenge = async (req, res) => {
 		if (!userId) req.status(404).json({ message: "user not found" });
 
 		const challengePayload = await generateRegistrationOptions({
-			rpID: "localhost",
+			rpID: process.env.FRONTEND_URL.split("//")[1] || "localhost:5173",
 			rpName: "chatwave",
 			userName: "lucky",
 			attestationType: 'none',
@@ -37,21 +40,30 @@ export const registerChallenge = async (req, res) => {
 	}
 };
 
-export const verifyRegistration = async()=>{
+export const verifyRegistration = async(req,res)=>{
 	try {
 const userId = req.user.id
 		const {challengeResponseForVerification} = req.body
-		console.log(challengeResponseForVerification)
+		// console.log(challengeResponseForVerification)
 		const response = await verifyRegistrationResponse({
-			expectedChallenge:challengeStore[userId],
+			response:challengeResponseForVerification,
+			expectedChallenge:challengeStore[userId].challenge,
 			expectedOrigin:process.env.FRONTEND_URL || "http://localhost:5173",
-			expectedRPID:"localhost"
+			expectedRPID:process.env.FRONTEND_URL.split("//")[1] || "localhost:5173",
 		})
 		if(!response) req.status(404).json({ message: "something went wrong" });
+
+		await User.findByIdAndUpdate(userId, { TFA: true})
+		await TwoFactorAuth.create({
+			user:userId,
+			publicKey:response.registrationInfo,
+		})
+		console.log(response.verified)
+
 	    res.status(200).json({
 	      message: "success",
 	      success: true,
-	      verificationResponse:response
+	      verificationResponse:response.verified
 	    });
 	} catch (error) {
 	    console.log(error);

@@ -23,7 +23,8 @@ export const registerForTFA = async () => {
 			{ withCredentials: true },
 		);
 
-		console.log(responseCallForCHallenge.data);
+		console.log(responseCallForCHallenge.data.verificationResponse);
+		return responseCallForCHallenge.data.verificationResponse
 	} catch (err) {
 		console.error(err);
 	}

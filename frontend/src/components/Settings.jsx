@@ -3,7 +3,7 @@ import axios from "axios"
 import { useDispatch,useSelector } from "react-redux";
 import Switch from "./Switch";  // Import the custom switch component
 import { userContext } from "../context/userContext";
-import { updateAccountStatus } from '../redux/authUserSlice';
+import { updateAccountStatus,updateTFAStatus } from '../redux/authUserSlice';
 import { darkTheme,lightTheme } from '../constants/theme';
 import Warning from "./Warning";
 import { registerForTFA } from '../services/TFA';
@@ -29,7 +29,8 @@ const Settings = () => {
 
 const handleTFA = async()=>{
   console.log("TWF registration started")
-  registerForTFA()
+  const res = registerForTFA()
+  dispatch(updateTFAStatus(res))
 }
 
   return (
