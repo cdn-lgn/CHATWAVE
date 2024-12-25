@@ -6,7 +6,7 @@ import { userContext } from "../context/userContext";
 import { updateAccountStatus,updateTFAStatus } from '../redux/authUserSlice';
 import { darkTheme,lightTheme } from '../constants/theme';
 import Warning from "./Warning";
-import { registerForTFA } from '../services/TFA';
+import { registerForTFA,cancelationForTFA } from '../services/TFA';
 
 const API_URL = import.meta.env.VITE_USER_API
 
@@ -27,15 +27,21 @@ const Settings = () => {
     setTheme ((prevTheme)=>prevTheme.background==lightTheme.background ? darkTheme : lightTheme)
   };
 
-const handleTFA = async()=>{
+const enableTFA = async()=>{
   console.log("TWF registration started")
-  const res = registerForTFA()
+  const res = registerForTFA({name:user.name})
+  dispatch(updateTFAStatus(res))
+}
+
+const disableTFA = async()=>{
+  console.log("TWF cancelation started")
+  const res = cancelationForTFA()
   dispatch(updateTFAStatus(res))
 }
 
   return (
     <div className="w-full items-start justify-start h-full rounded-lg overflow-x-hidden" style={{ backgroundColor: theme.secondary,color:theme.text }}>
-    {confirmation && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"} next={handleTFA}/>}
+    {confirmation && !user.TFA && <Warning warningTitle={"Are you sure"} warningMessage={"if you turn on 2FA and lost your passkey you cannot access your account !"} next={enableTFA}/>}
       <div className="w-full px-6 pb-8 rounded-lg pt-4" style={{ backgroundColor: theme.background }}>
         <h2 className="text-2xl font-bold sm:text-xl" style={{ color: theme.text }}>
           Other settings
@@ -62,7 +68,7 @@ const handleTFA = async()=>{
             <span className="text-sm font-medium">
               Hide Two Factor Authentication
             </span>
-            <Switch checked={user?.TFA==true} onChange={()=>setConfirmation(true)} />
+            <Switch checked={user?.TFA==true} onChange={user.TFA ? disableTFA : setConfirmation(true)} />
           </div>
         </div>
       </div>

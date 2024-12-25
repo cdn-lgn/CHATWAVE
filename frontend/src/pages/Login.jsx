@@ -5,6 +5,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { setUser } from "../redux/authUserSlice";
+import { verificationForTFA } from '../services/TFA';
 
 const loginUrl = `${import.meta.env.VITE_USER_API}/user/login`;
 
@@ -27,7 +28,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post(
+      let response = await axios.post(
         loginUrl,
         { email, password },
         {
@@ -36,6 +37,10 @@ const Login = () => {
         },
       );
       console.log(response.data.user);
+if(response?.data?.TFAStatus){
+      console.log(response.data);
+      const TFACheck =await verificationForTFA({userId:response?.data?.userId})
+}
       dispatch(setUser(response.data.user));
       navigate("/");
     } catch (err) {

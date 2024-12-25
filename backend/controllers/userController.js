@@ -56,6 +56,9 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    if(isPasswordValid && user.TFA){
+      return res.status(200).json({ message: "start TFA",TFAStatus:true,userId:user._id });
+    }
     // Generate token
     const token = generateToken(user._id);
     res.cookie("token", token, {
