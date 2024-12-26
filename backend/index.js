@@ -163,6 +163,11 @@ io.on("connection", async (socket) => {
             io.to(receiverSocketId).emit("accepted-call",{senderID,signal})
         })
 
+       socket.on("end-call",(data)=>{
+            const {receiverID} = data
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            io.to(receiverSocketId).emit("end-call")
+        })
 
 
 
