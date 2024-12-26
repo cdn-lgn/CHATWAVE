@@ -31,7 +31,7 @@ const Home = () => {
         className="relative w-full h-dvh overflow-hidden flex items-center justify-start gap-2 transition-all duration-300"
         style={{ backgroundColor: theme.secondary }}
       >
-
+<CallScreen/>
             <Navbar />
             {middleComponent === "chatList" && <ChatListBox />}
             {middleComponent === "groupList" && <GroupListBox />}
@@ -52,6 +52,8 @@ const Home = () => {
         className="relavtive w-dwh max-h-dvh flex items-start justify-start gap-2 flex-col overflow-x-hidden transition-all duration-300 scrollable-for-chat"
         style={{ backgroundColor: theme.secondary }}
       >
+<CallScreen/>
+      
         {mainViewForMobile === "menuScreen" && (
           <>
             <Navbar />

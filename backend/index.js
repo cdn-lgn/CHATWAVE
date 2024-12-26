@@ -63,7 +63,6 @@ const onlineUsers = new Map();
 io.use(ioAuthMiddleware);
 io.on("connection", async (socket) => {
     try {
-        console.log("Namespace:", socket.nsp.name);
         const userID = socket.user?._id.toString(); // Access the authenticated user
         await User.findByIdAndUpdate(userID, { status: "online" });
         if (!userID) {
@@ -80,7 +79,7 @@ io.on("connection", async (socket) => {
         io.emit("user_status_change", { userID, status: "online" });
 
         socket.on("user_typing_status", (data) => {
-            console.log("Typing status:", onlineUsers.get(data.receiverID));
+            // console.log("Typing status:", onlineUsers.get(data.receiverID));
             const receiverSocketId = onlineUsers.get(data.receiverID)?.socketId;
             socket.to(receiverSocketId).emit("user_typing_status", data);
         });
@@ -148,6 +147,25 @@ io.on("connection", async (socket) => {
                 console.log(`User with ID ${userID} disconnected.`);
             }
         });
+
+
+// web RTC with Simple Peer
+        socket.on("user-call",(data)=>{
+            const {sender,receiverID,signal} = data
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            io.to(receiverSocketId).emit("user-call",{sender,signal})
+            console.log(`call alert send by ${sender.name} to ${receiverID} `)
+        })
+
+         socket.on("answer-call",(data)=>{
+            const {senderID,receiverID,signal} = data
+            const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
+            io.to(receiverSocketId).emit("accepted-call",{senderID,signal})
+        })
+
+
+
+
     } catch (err) {
         console.error("Error during socket connection:", err);
     }

@@ -4,11 +4,10 @@ import { faPhoneAlt, faPhoneSlash, faVolumeUp, faMicrophone } from "@fortawesome
 import { SocketContext } from "../context/socketContext";
 
 const CallScreen = () => {
-    const { callStatus, handleAnswerCall, currentUserVideoRef,
-                remoteVideoRef } = useContext(SocketContext);
+    const { callStatus, answerCallHandler,myVideoRef,callerVideoRef } = useContext(SocketContext);
 
     const handleAnswer = async() => {
-        handleAnswerCall();
+        answerCallHandler();
     };
 
     const handleEndCall = () => {
@@ -16,15 +15,18 @@ const CallScreen = () => {
         // handleEndCall();
     };
 
-    if (callStatus === "sending") {
+    if (callStatus === "sending-call") {
         return (
             <div className="fixed w-[300px] h-[300px] bg-yellow-300 rounded-xl z-20 bottom-0">
                 <FontAwesomeIcon icon={faVolumeUp} />
                 <FontAwesomeIcon icon={faPhoneSlash} onClick={handleEndCall} />
+                  <div>
+        <video autoPlay muted ref={myVideoRef} />
+      </div>
             </div>
         );
     }
-    if (callStatus === "incoming") {
+    if (callStatus === "incoming-call") {
         return (
             <div className="fixed w-[300px] h-[300px] bg-yellow-300 rounded-xl z-20 bottom-0">
                 <FontAwesomeIcon icon={faPhoneAlt} onClick={handleAnswer} />
@@ -32,14 +34,16 @@ const CallScreen = () => {
             </div>
         );
     }
-    if (callStatus === "connected") {
+    if (callStatus === "accepted-call") {
         return (
             <div className="fixed w-[300px] h-[300px] bg-yellow-300 rounded-xl z-20 bottom-0 bg-yellow-300">
                 <div>
-        <video ref={currentUserVideoRef} />
+                <h3>myVideo</h3>
+        <video ref={myVideoRef} autoPlay/>
       </div>
       <div>
-        <video ref={remoteVideoRef} />
+      <h3>friendVideo</h3>
+        <video ref={callerVideoRef} autoPlay/>
       </div>
 
                 <div className="controls">

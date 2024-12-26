@@ -13,9 +13,9 @@ import {
     updateParticipantStatus,
     updateParticipantTypingStatus,
 } from "../redux/chatListSlice";
-import { Peer } from "peerjs";
+import Peer from "simple-peer"
 
-const backendUrl = import.meta.env.VITE_SOCKET_API
+const backendUrl = import.meta.env.VITE_SOCKET_API;
 
 export const SocketContext = createContext();
 
@@ -24,13 +24,94 @@ export const SocketProvider = ({ children }) => {
     const user = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
 
-    const [peerId, setPeerId] = useState("");
-    const [remotePeerIdValue, setRemotePeerIdValue] = useState("");
-    const remoteVideoRef = useRef(null);
-    const currentUserVideoRef = useRef(null);
-    const peerInstance = useRef(null);
+    const connectionRef = useRef(null);
+    const myVideoRef = useRef(null);
+    const callerVideoRef = useRef(null);
     const [callStatus, setCallStatus] = useState(""); // Track call status
-    const [onCallUser, setOnCallUser] = useState(null); // Track user being called
+    const [onCallUser, setOnCallUser] = useState(""); // Track user being called
+    const [myStream, setMyStream] = useState("");
+    const [callerSignal, setCallerSignal] = useState("");
+
+    const startCallHandler = async ({ receiver, sender }) => {
+    console.log("starting startCallHandler function");
+
+    try {
+        setCallStatus("sending-call");
+        const stream = await navigator.mediaDevices.getUserMedia({ /*video: true,*/ udio: true });
+        setMyStream(stream);  // Set the stream state
+        myVideoRef.current.srcObject=stream
+
+
+        const peer =await new Peer({
+            initiator: true ,
+            stream: stream,   // Pass the 'stream' directly here
+            trickle: false,
+        });
+
+console.log("peer created : ",peer);
+
+        peer.on("signal", (data) => {
+            if (socket.current) {
+                socket.current.emit("user-call", {
+                    signal: data,
+                    receiverID: receiver._id,
+                    sender,
+                });
+                setOnCallUser(receiver);
+                setCallStatus("sending-call");
+            }
+        });
+
+        peer.on("stream", (callerStream) => {
+            if (callerVideoRef.current) {
+                callerVideoRef.current.srcObject = callerStream;
+            }
+        });
+
+        socket?.current.once("accepted-call", (data) => {
+            const { signal, senderID } = data;
+            setCallStatus("accepted-call");
+            peer.signal(signal);
+        });
+
+        connectionRef.current = peer;
+    } catch (error) {
+        console.error("Error getting user media or starting the call:", error);
+    }
+};
+
+
+    const answerCallHandler = async() => {
+        setCallStatus("accepted-call");
+        const stream =await navigator.mediaDevices.getUserMedia({ /*video: true,*/ audio: true })
+        setMyStream(stream)
+
+        const peer = new Peer({
+            initiator: false,
+            stream: stream,
+            trickle: false,
+        });
+
+        myVideoRef.current.srcObject=stream
+
+        peer.on("signal", (data) => {
+            if (socket?.current) {
+                socket.current.emit("answer-call", {
+                    signal: data,
+                    receiverID: onCallUser._id,
+                    senderID: user._id,
+                });
+                setCallStatus("accepted-call");
+            }
+
+            peer.on("stream", (callerStream) => {
+                callerVideoRef.current.srcObject = callerStream;
+            });
+        });
+
+        peer.signal(callerSignal);
+        connectionRef.current = peer;
+    };
 
     // Setup socket connection and event listeners
     useEffect(() => {
@@ -68,15 +149,23 @@ export const SocketProvider = ({ children }) => {
                     dispatch(updateChat(updatedChat));
                 },
             );
-            socket.current.on("add_chat",({createdChat})=>{
-                console.log(createdChat)
-                dispatch(updateChat(createdChat))
-            })
+            socket.current.on("add_chat", ({ createdChat }) => {
+                console.log(createdChat);
+                dispatch(updateChat(createdChat));
+            });
 
             // socket.current.on("message_delivered", (data) => console.log("delivered"));
             socket.current.on("connect_error", (err) => {
                 console.error("Socket connection error:", err);
                 // alert("Socket connection error. Please try again.");
+            });
+
+            // web RTC with Simple Peer
+            socket.current.on("user-call", (data) => {
+                const { sender, signal } = data;
+                setCallStatus("incoming-call");
+                setOnCallUser(sender);
+                setCallerSignal(signal);
             });
 
             return () => {
@@ -88,54 +177,13 @@ export const SocketProvider = ({ children }) => {
         }
     }, [user, dispatch]);
 
-    const sendCall = (remotePeerId) => {
-        var getUserMedia =
-            navigator.getUserMedia ||
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia;
-
-        getUserMedia({ video: true, audio: true }, (mediaStream) => {
-            currentUserVideoRef.current.srcObject = mediaStream;
-            currentUserVideoRef.current.play();
-
-            const call = peerInstance.current.call(remotePeerId, mediaStream);
-
-            call.on("stream", (remoteStream) => {
-                remoteVideoRef.current.srcObject = remoteStream;
-                remoteVideoRef.current.play();
-            });
-        });
-    };
-    useEffect(() => {
-        const peer = new Peer(user._id);
-
-        peer.on("open", (id) => {
-            setPeerId(id);
-        });
-
-        peer.on("call", (call) => {
-            var getUserMedia =
-                navigator.getUserMedia ||
-                navigator.webkitGetUserMedia ||
-                navigator.mozGetUserMedia;
-
-            getUserMedia({ video: true, audio: true }, (mediaStream) => {
-                currentUserVideoRef.current.srcObject = mediaStream;
-                currentUserVideoRef.current.play();
-                call.answer(mediaStream);
-                call.on("stream", function (remoteStream) {
-                    remoteVideoRef.current.srcObject = remoteStream;
-                    remoteVideoRef.current.play();
-                });
-            });
-        });
-        peerInstance.current = peer;
-    }, []);
-
     return (
         <SocketContext.Provider
             value={{
                 socket,
+                startCallHandler,
+                callStatus,setCallStatus,
+                answerCallHandler,myVideoRef,callerVideoRef
             }}
         >
             {children}

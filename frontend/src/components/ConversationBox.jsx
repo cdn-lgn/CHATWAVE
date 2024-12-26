@@ -23,7 +23,7 @@ import FileBox from "./FileBox";
 const API_URL = import.meta.env.VITE_USER_API;
 
 const ConversationBox = () => {
-    const { socket } = useContext(SocketContext);
+    const { socket, startCallHandler } = useContext(SocketContext);
     const {
         theme,
         receiver,
@@ -154,7 +154,8 @@ const ConversationBox = () => {
                         chatID,
                         senderID: user._id,
                         receiverID: receiver?.participant?._id || receiver._id,
-                        isGroupMessage: createdChat?.isGroupChat || receiver?.isGroupChat,
+                        isGroupMessage:
+                            createdChat?.isGroupChat || receiver?.isGroupChat,
                         groupID: receiver?.group?._id,
                         content,
                     },
@@ -189,6 +190,20 @@ const ConversationBox = () => {
         } finally {
             isRequestPending = false;
         }
+    };
+
+    const callIconHandler = () => {
+        const callReceiver = {
+            name: receiver?.participant?.name,
+            profileImage: receiver?.participant?.profileImage,
+            _id: receiver?.participant?._id,
+        };
+        const callSender = {
+            name: user.name,
+            profileImage: user.profileImage,
+            _id: user._id,
+        };
+        startCallHandler({ receiver: callReceiver, sender: callSender });
     };
 
     useEffect(() => {
@@ -253,7 +268,10 @@ const ConversationBox = () => {
                             </div>
                         </div>
                         <div className="flex space-x-4">
-                            <button className="text-xl hidden">
+                            <button
+                                className="text-xl"
+                                onClick={callIconHandler}
+                            >
                                 <FontAwesomeIcon icon={faPhone} />
                             </button>
                             <button className="text-xl">
