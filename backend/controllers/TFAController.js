@@ -175,12 +175,17 @@ export const loginVerify = async (req, res) => {
 		
 	  });
   
-console.log(verifiedCredentialsResult)
+if(!verifiedCredentialsResult.verified){
+	return res.status(200).json({ message: "authentication Not matched",verified:false });
+}
+
+
+const user = await User.findById(userId)
 
 	  res.status(200).json({
 		message: "success",
-		success: true,
-		verificationResponse: verifiedCredentialsResult.verified,
+		verified: true,
+		user
 	  });
 	} catch (error) {
 	  console.log(error);
@@ -191,3 +196,11 @@ console.log(verifiedCredentialsResult)
 	}
   };
   
+
+  export const verifyByKey =async()=>{
+	try {
+		
+	} catch (error) {
+		
+	}
+  }
