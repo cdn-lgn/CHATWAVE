@@ -28,7 +28,7 @@ export const registerForTFA = async ({ name }) => {
 		);
 
 		console.log(responseCallForChallenge.data.verificationResponse);
-		return responseCallForChallenge.data.verificationResponse;
+		return responseCallForChallenge.data;
 	} catch (err) {
 		console.error(err);
 	}
@@ -63,9 +63,19 @@ export const verificationForTFA = async ({ userId }) => {
 			{ credentials: authenticationResult, userId },
 		);
 
-		console.log(verificationResult.data)
-		return userId
+		// console.log(verificationResult.data)
+		return verificationResult
 	} catch (error) {
 		console.log(error);
 	}
 };
+
+
+export const secretPasskeyCheck = async({userId,secretPasskey})=>{
+	try {
+		const res = await axios.post("verify-passkey-2FA",{userId,secretPasskey})
+		return res
+	} catch (error) {
+		console.log(error)
+	}
+}

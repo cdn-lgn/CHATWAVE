@@ -5,7 +5,7 @@ import Switch from "./Switch";  // Import the custom switch component
 import { userContext } from "../context/userContext";
 import { updateAccountStatus, updateTFAStatus } from '../redux/authUserSlice';
 import { darkTheme, lightTheme } from '../constants/theme';
-import Warning from "./Warning";
+import Warning from "./Warning";  // Import the Warning component
 import { registerForTFA, cancelationForTFA } from '../services/TFA';
 
 const API_URL = import.meta.env.VITE_USER_API;
@@ -15,6 +15,8 @@ const Settings = () => {
   const user = useSelector(state => state.user.user);
   const dispatch = useDispatch();
   const [confirmation, setConfirmation] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);  // State to show the secret passkey modal
+  const [secretPasskey, setSecretPasskey] = useState("");  // Store the secret passkey
 
   const handleHideAccount = async () => {
     try {
@@ -31,8 +33,20 @@ const Settings = () => {
 
   const enableTFA = async () => {
     console.log("TFA registration started");
-    const res = await registerForTFA({ name: user.name });
-    dispatch(updateTFAStatus(res));
+    try {
+      const res = await registerForTFA({ name: user.name });
+
+      // Dispatch the update with the verified status
+      dispatch(updateTFAStatus(res.verified));
+
+      if (res.verified) {
+        // If TFA is verified, show the secret key
+        setSecretPasskey(res.secretPasskey);  // Store the secret passkey
+        setShowSecretKey(true);  // Show the secret passkey modal
+      }
+    } catch (error) {
+      console.log("Error enabling TFA: ", error);
+    }
   };
 
   const disableTFA = async () => {
@@ -51,7 +65,27 @@ const Settings = () => {
 
   return (
     <div className="w-full items-start justify-start h-full rounded-lg overflow-x-hidden" style={{ backgroundColor: theme.secondary, color: theme.text }}>
-      {confirmation && !user.TFA && <Warning warningTitle={"Are you sure?"} warningMessage={"If you turn on 2FA and lose your passkey, you cannot access your account!"} setConfirmation={setConfirmation} next={enableTFA} />}
+      
+      {/* Show confirmation for enabling TFA */}
+      {confirmation && !user.TFA && (
+        <Warning 
+          warningTitle="Are you sure?" 
+          warningMessage="If you turn on 2FA and lose your passkey, you cannot access your account!" 
+          setConfirmation={setConfirmation} 
+          next={enableTFA} 
+        />
+      )}
+      
+      {/* Show the secret key modal after 2FA is enabled */}
+      {showSecretKey && (
+        <Warning 
+          warningTitle="Secret Passkey"
+          warningMessage={`Your secret passkey: ${secretPasskey}. Keep this safe, as losing it will result in permanent loss of access to your account.`}
+          setConfirmation={() => setShowSecretKey(false)} 
+          next={() => setShowSecretKey(false)} 
+        />
+      )}
+
       <div className="w-full px-6 pb-8 rounded-lg pt-4" style={{ backgroundColor: theme.background }}>
         <h2 className="text-2xl font-bold sm:text-xl" style={{ color: theme.text }}>
           Other settings

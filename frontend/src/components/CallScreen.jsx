@@ -39,11 +39,11 @@ const CallScreen = () => {
             <div className="fixed w-[300px] h-[300px] bg-yellow-300 rounded-xl z-20 bottom-0 bg-yellow-300">
                 <div>
                 <h3>myVideo</h3>
-        <video ref={myVideoRef} autoPlay/>
+        <video ref={myVideoRef} muted autoPlay/>
       </div>
       <div>
       <h3>friendVideo</h3>
-        <video ref={callerVideoRef} autoPlay/>
+        <video ref={callerVideoRef} muted autoPlay/>
       </div>
 
                 <div className="controls">

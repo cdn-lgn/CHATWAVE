@@ -5,7 +5,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { setUser } from "../redux/authUserSlice";
-import { verificationForTFA } from '../services/TFA';
+import { verificationForTFA, secretPasskeyCheck } from '../services/TFA';
 
 const loginUrl = `${import.meta.env.VITE_USER_API}/user/login`;
 
@@ -15,6 +15,9 @@ const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [secretPasskeyPrompt, setSecretPasskeyPrompt] = useState(false);
+  const [secretPasskey, setSecretPasskey] = useState("");
+  const [userId, setUserId] = useState(null);  // Added state to store userId
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -28,26 +31,64 @@ const Login = () => {
     setError("");
 
     try {
-      let response = await axios.post(
+      // Call login API
+      const loginResponse = await axios.post(
         loginUrl,
         { email, password },
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
-        },
+        }
       );
-      console.log(response.data.user);
-if(response?.data?.TFAStatus){
-      console.log(response.data);
-      const TFACheck =await verificationForTFA({userId:response?.data?.userId})
-}
-      dispatch(setUser(response.data.user));
-      navigate("/");
+
+      // Save userId in state
+      setUserId(loginResponse.data.userId);
+
+      if (loginResponse?.data?.TFAStatus) {
+        const TFACheck = await verificationForTFA({ userId: loginResponse?.data?.userId });
+
+        if (TFACheck.data.verified) {
+          dispatch(setUser(TFACheck.data.user));
+          navigate("/");
+        } else {
+          setSecretPasskeyPrompt(true);
+        }
+      } else {
+        dispatch(setUser(loginResponse.data.user));
+        navigate("/");
+      }
     } catch (err) {
-      console.error("Login failed", err);
       setError("Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSecretPasskeySubmit = async () => {
+    if (!secretPasskey) {
+      setError("Please enter the secret passkey.");
+      return;
+    }
+
+    try {
+      if (!userId) {
+        setError("User not found.");
+        return;
+      }
+      const passkeyResponse = await secretPasskeyCheck({
+        userId: userId,secretPasskey,
+      });
+
+      if (passkeyResponse.data.verified) {
+        dispatch(setUser(passkeyResponse.data.user));
+        navigate("/");
+      } else {
+        setError("Invalid secret passkey.");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSecretPasskeyPrompt(false);
     }
   };
 
@@ -68,7 +109,7 @@ if(response?.data?.TFAStatus){
             Welcome Back!
           </h2>
           <p className="text-gray-500 text-center mb-6">
-            Login to continue to Chatewave
+            Login to continue to Chatwave
           </p>
 
           <form onSubmit={loginUser} className="space-y-4">
@@ -140,6 +181,36 @@ if(response?.data?.TFAStatus){
           </p>
         </div>
       </div>
+
+      {secretPasskeyPrompt && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h2 className="text-lg font-semibold mb-4">Enter your Secret Passkey</h2>
+            <input
+              type="text"
+              maxLength="10"
+              value={secretPasskey}
+              onChange={(e) => setSecretPasskey(e.target.value)}
+              placeholder="Enter secret passkey"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            />
+            <div className="flex justify-between">
+              <button
+                onClick={() => setSecretPasskeyPrompt(false)}
+                className="px-4 py-2 bg-gray-300 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSecretPasskeySubmit}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

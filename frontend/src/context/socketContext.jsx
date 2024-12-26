@@ -37,7 +37,7 @@ export const SocketProvider = ({ children }) => {
 
     try {
         setCallStatus("sending-call");
-        const stream = await navigator.mediaDevices.getUserMedia({ /*video: true,*/ udio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({video:true, audio: true });
         setMyStream(stream);  // Set the stream state
         myVideoRef.current.srcObject=stream
 
@@ -65,10 +65,12 @@ console.log("peer created : ",peer);
         peer.on("stream", (callerStream) => {
             if (callerVideoRef.current) {
                 callerVideoRef.current.srcObject = callerStream;
+                myVideoRef.current.srcObject = stream
             }
         });
 
         socket?.current.once("accepted-call", (data) => {
+            console.log("answer yes of call")
             const { signal, senderID } = data;
             setCallStatus("accepted-call");
             peer.signal(signal);
@@ -83,7 +85,7 @@ console.log("peer created : ",peer);
 
     const answerCallHandler = async() => {
         setCallStatus("accepted-call");
-        const stream =await navigator.mediaDevices.getUserMedia({ /*video: true,*/ audio: true })
+        const stream =await navigator.mediaDevices.getUserMedia({ video:true,audio: true })
         setMyStream(stream)
 
         const peer = new Peer({
@@ -104,9 +106,11 @@ console.log("peer created : ",peer);
                 setCallStatus("accepted-call");
             }
 
-            peer.on("stream", (callerStream) => {
-                callerVideoRef.current.srcObject = callerStream;
-            });
+           
+        });
+        peer.on("stream", (callerStream) => {
+            console.log("caller's streams",callerStream)
+            callerVideoRef.current.srcObject = callerStream;
         });
 
         peer.signal(callerSignal);
