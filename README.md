@@ -9,14 +9,11 @@ https://talkwave-three.vercel.app/login
 
 
 ## Screenshots
+![sample1](https://github.com/user-attachments/assets/997ceef2-1293-479f-8c9b-8c3c1e59b13c =300x)
+![sample2](https://github.com/user-attachments/assets/95cd10a9-7dba-4a97-92b0-4a9040c4af86 =300x)
+![sample3](https://github.com/user-attachments/assets/80a97900-61ac-4d5c-a796-c51efab976a0=300x)
+![sample4](https://github.com/user-attachments/assets/9939ac63-4d8f-42e4-9389-7df135746d17=300x)
 
-![Screenshot 1](./screenshots/sample1.png =300x)
-
-![Screenshot2](./screenshots/sample2.png =300x)
-
-![Screenshot 3](./screenshots/sample3.png =300x)
-
-![Screenshot 4](./screenshots/sample4.png =300x)
 
 ## Features
 
@@ -33,6 +30,7 @@ https://talkwave-three.vercel.app/login
 Here are the technologies used to build **CHATWAVE**:
 
 <p>
+  <img width="50" src="https://user-images.githubusercontent.com/25181517/183897015-94a058a6-b86e-4e42-a37f-bf92061753e5.png" alt="React" title="React"/>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original-wordmark.svg" alt="MongoDB" width="40" height="40"/>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/express/express-original-wordmark.svg" alt="Express.js" width="40" height="40"/>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original-wordmark.svg" alt="React" width="40" height="40"/>
