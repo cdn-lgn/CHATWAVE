@@ -15,11 +15,11 @@ import { Server } from "socket.io";
 import { ioAuthMiddleware } from "./middleware/ioAuthMiddleware.js";
 import User from "./models/userSchema.js";
 import { getGroupMembersForMessage } from "./controllers/groupController.js";
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 dotenv.config();
-if(!globalThis.crypto){
-    globalThis.crypto=crypto
+if (!globalThis.crypto) {
+    globalThis.crypto = crypto;
 }
 
 const app = express();
@@ -39,8 +39,8 @@ app.use(
     cors({
         origin: process.env.FRONTEND_URL || "http://localhost:5173",
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allow methods for CORS
-        allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // Allow methods for CORS
+        allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
     }),
 );
 
@@ -94,7 +94,7 @@ io.on("connection", async (socket) => {
                         if (userSocket) {
                             io.to(userSocket.socketId).emit(
                                 "receive_group_message",
-                                {updatedChat,newMessage },
+                                { updatedChat, newMessage },
                             );
                         }
                     });
@@ -148,29 +148,25 @@ io.on("connection", async (socket) => {
             }
         });
 
-
-// web RTC with Simple Peer
-        socket.on("user-call",(data)=>{
-            const {sender,receiverID,signal} = data
+        // web RTC with Simple Peer
+        socket.on("user-call", (data) => {
+            const { sender, receiverID, signal } = data;
             const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            io.to(receiverSocketId).emit("user-call",{sender,signal})
-            console.log(`call alert send by ${sender.name} to ${receiverID} `)
-        })
+            io.to(receiverSocketId).emit("user-call", { sender, signal });
+            console.log(`call alert send by ${sender.name} to ${receiverID} `);
+        });
 
-         socket.on("answer-call",(data)=>{
-            const {senderID,receiverID,signal} = data
+        socket.on("answer-call", (data) => {
+            const { senderID, receiverID, signal } = data;
             const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            io.to(receiverSocketId).emit("accepted-call",{senderID,signal})
-        })
+            io.to(receiverSocketId).emit("accepted-call", { senderID, signal });
+        });
 
-       socket.on("end-call",(data)=>{
-            const {receiverID} = data
+        socket.on("end-call", (data) => {
+            const { receiverID } = data;
             const receiverSocketId = onlineUsers.get(receiverID)?.socketId;
-            io.to(receiverSocketId).emit("end-call")
-        })
-
-
-
+            io.to(receiverSocketId).emit("end-call");
+        });
     } catch (err) {
         console.error("Error during socket connection:", err);
     }
