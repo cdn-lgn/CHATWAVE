@@ -1,11 +1,12 @@
 
-# CHATWAVE - A Modern Chatting App
+<img src="https://github.com/user-attachments/assets/f9337628-49d9-413f-b0ae-655ea4ca55ed" width="300" alt="Sample 1"> # CHATWAVE - A Modern Chatting App
 
 **CHATWAVE** is a real-time messaging application that allows users to chat with friends, share files, and make video calls. Built with the **MERN stack** and several cutting-edge technologies, **CHATWAVE** is secure, easy to use, and offers a great user experience with features like dark and light modes, file sharing, two-factor authentication, and more.
 
 
 ## Demo
 https://talkwave-three.vercel.app/login
+
 
 
 ## Screenshots
