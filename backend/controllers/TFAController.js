@@ -199,7 +199,7 @@ const token = generateToken(userId);
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "None",
     });
 	console.log(token)
 
@@ -234,7 +234,7 @@ const token = generateToken(userId);
 		res.cookie("token", token, {
 		  httpOnly: true,
 		  secure: true,
-		  sameSite: "strict",
+		  sameSite: "None",
 		});
 	
 		const user = await User.findById(userId)
