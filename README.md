@@ -1,5 +1,4 @@
-<img src="https://github.com/user-attachments/assets/f9337628-49d9-413f-b0ae-655ea4ca55ed" width="40" alt="Sample 1">
-## CHATWAVE - A Modern Chatting App
+## CHATWAVE - A Modern Chatting App <img src="https://github.com/user-attachments/assets/f9337628-49d9-413f-b0ae-655ea4ca55ed" width="40" alt="Sample 1">
 
 **CHATWAVE** is a real-time messaging application that allows users to chat with friends, share files, and make video calls. Built with the **MERN stack** and several cutting-edge technologies, **CHATWAVE** is secure, easy to use, and offers a great user experience with features like dark and light modes, file sharing, two-factor authentication, and more.
 
@@ -37,7 +36,6 @@ Here are the technologies used to build **CHATWAVE**:
 	<img width="50" src="https://user-images.githubusercontent.com/25181517/183568594-85e280a7-0d7e-4d1a-9028-c8c2209e073c.png" alt="Node.js" title="Node.js"/><img width="50" src="https://user-images.githubusercontent.com/25181517/183859966-a3462d8d-1bc7-4880-b353-e2cbed900ed6.png" alt="Express" title="Express"/>
 	<img width="50" src="https://user-images.githubusercontent.com/25181517/182884177-d48a8579-2cd0-447a-b9a6-ffc7cb02560e.png" alt="mongoDB" title="mongoDB"/>
   <img src="https://socket.io/images/logo-dark.svg" alt="Socket.IO" width="40" height="40"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/webassembly/webassembly-original-wordmark.svg" alt="SimplePeer" width="40" height="40"/>
   <img src="https://imagekit.io/icons/icon-192x192.png" alt="ImageKit" width="40" height="40"/>
 	
 ![SimplePeer](https://img.shields.io/badge/SimplePeer-WebRTC-blue)
