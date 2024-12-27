@@ -40,6 +40,7 @@ Here are the technologies used to build **CHATWAVE**:
   <img width="50" src="https://user-images.githubusercontent.com/25181517/182884177-d48a8579-2cd0-447a-b9a6-ffc7cb02560e.png" alt="mongoDB" title="mongoDB" />&nbsp;&nbsp;
   <img src="https://socket.io/images/logo-dark.svg" alt="Socket.IO" width="40" height="40" />&nbsp;&nbsp;
   <img src="https://imagekit.io/icons/icon-192x192.png" alt="ImageKit" width="40" height="40" />&nbsp;&nbsp;
+  
   ![SimplePeer](https://img.shields.io/badge/SimplePeer-WebRTC-blue)&nbsp;&nbsp;
   ![ImageKit](https://img.shields.io/badge/ImageKit-Integration-orange)
 </p>
