@@ -9,7 +9,7 @@ https://talkwave-three.vercel.app/login
 
 
 ## Screenshots
-![sample1](https://github.com/user-attachments/assets/997ceef2-1293-479f-8c9b-8c3c1e59b13c)
+![sample1](https://github.com/user-attachments/assets/997ceef2-1293-479f-8c9b-8c3c1e59b13c =300x)
 ![sample2](https://github.com/user-attachments/assets/95cd10a9-7dba-4a97-92b0-4a9040c4af86)
 ![sample3](https://github.com/user-attachments/assets/80a97900-61ac-4d5c-a796-c51efab976a0)
 ![sample4](https://github.com/user-attachments/assets/9939ac63-4d8f-42e4-9389-7df135746d17)
@@ -31,13 +31,8 @@ Here are the technologies used to build **CHATWAVE**:
 
 <p>
   <img width="50" src="https://user-images.githubusercontent.com/25181517/183897015-94a058a6-b86e-4e42-a37f-bf92061753e5.png" alt="React" title="React"/>
-  <div align="center">
 	<img width="50" src="https://user-images.githubusercontent.com/25181517/183568594-85e280a7-0d7e-4d1a-9028-c8c2209e073c.png" alt="Node.js" title="Node.js"/><img width="50" src="https://user-images.githubusercontent.com/25181517/183859966-a3462d8d-1bc7-4880-b353-e2cbed900ed6.png" alt="Express" title="Express"/>
 	<img width="50" src="https://user-images.githubusercontent.com/25181517/182884177-d48a8579-2cd0-447a-b9a6-ffc7cb02560e.png" alt="mongoDB" title="mongoDB"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original-wordmark.svg" alt="MongoDB" width="40" height="40"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/express/express-original-wordmark.svg" alt="Express.js" width="40" height="40"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original-wordmark.svg" alt="React" width="40" height="40"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original-wordmark.svg" alt="Node.js" width="40" height="40"/>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/socketio/socketio-original-wordmark.svg" alt="Socket.IO" width="40" height="40"/>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/webassembly/webassembly-original-wordmark.svg" alt="SimplePeer" width="40" height="40"/>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/npm/npm-original-wordmark.svg" alt="SimpleWebAuthn" width="40" height="40"/>
