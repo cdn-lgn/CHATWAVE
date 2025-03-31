@@ -239,7 +239,8 @@ const token = generateToken(userId);
 	
 		const user = await User.findById(userId)
 
-
+		// console.log("token==> ",token)
+		// console.log("user==> ",user)
 	  res.status(200).json({
 		verified: true,
 		user

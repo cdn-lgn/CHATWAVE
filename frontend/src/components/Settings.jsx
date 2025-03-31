@@ -108,12 +108,12 @@ const Settings = () => {
           </div>
 
           {/* Third Setting */}
-          {/*<div className="flex items-center justify-between w-full">
+          <div className="flex items-center justify-between w-full">
             <span className="text-sm font-medium">
               Two-Factor Authentication
             </span>
             <Switch checked={user?.TFA === true} onChange={handleTFAChange} />
-          </div>*/}
+          </div>
         </div>
       </div>
     </div>
