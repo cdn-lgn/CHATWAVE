@@ -16,7 +16,7 @@
 Here are some screenshots of **CHATWAVE**:
 
 
-<img src="https://github.com/user-attachments/assets/0707407e-9305-44cd-a135-329cc5452c26" width="400" height="300" />
+<img src="https://github.com/user-attachments/assets/0707407e-9305-44cd-a135-329cc5452c26" width="400" />
 <img src="https://github.com/user-attachments/assets/b25d9925-23f9-4b0b-9930-850c081c3336" width="400" />
 
 
