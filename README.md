@@ -12,11 +12,9 @@
 
 ## Screenshots
 Here are some screenshots of **CHATWAVE**:
+<img src="https://github.com/user-attachments/assets/0707407e-9305-44cd-a135-329cc5452c26" width="400" height="300" />
+<img src="https://github.com/user-attachments/assets/b25d9925-23f9-4b0b-9930-850c081c3336" width="400" />
 
-<img src="https://github.com/user-attachments/assets/997ceef2-1293-479f-8c9b-8c3c1e59b13c" width="300" alt="Sample 1">
-<img src="https://github.com/user-attachments/assets/95cd10a9-7dba-4a97-92b0-4a9040c4af86" width="300" alt="Sample 2">
-<img src="https://github.com/user-attachments/assets/80a97900-61ac-4d5c-a796-c51efab976a0" width="300" alt="Sample 3">
-<img src="https://github.com/user-attachments/assets/9939ac63-4d8f-42e4-9389-7df135746d17" width="300" alt="Sample 4">
 
 
 ## Features
