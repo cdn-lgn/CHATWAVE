@@ -2,10 +2,12 @@
 
 **CHATWAVE** is a real-time messaging application that allows users to chat with friends, share files, and make video calls. Built with the **MERN stack** and several cutting-edge technologies, **CHATWAVE** is secure, easy to use, and offers a great user experience with features like dark and light modes, file sharing, two-factor authentication, and more.
 
-
 ## Demo
 
-[![Opera Snapshot_2024-12-27_134003_talkwave-three vercel app](https://github.com/user-attachments/assets/34f447e6-c885-4290-9f54-4be87166f754)](https://talkwave-three.vercel.app/login)
+<a href="https://talkwave-three.vercel.app/login" target="_blank">
+  <img src="https://github.com/user-attachments/assets/af67dd4b-25fd-4b55-9813-5df103c8e8e5" width="600" alt="Demo Screenshot" />
+</a>
+
 
 
 
