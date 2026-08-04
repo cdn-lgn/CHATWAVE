@@ -29,7 +29,7 @@ Here are some screenshots of **CHATWAVE**:
 - **File Sharing:** Upload and share images, audio files, and PDFs using **ImageKit** for secure and optimized delivery.
 - **Dark and Light Mode:** Switch between dark and light themes to suit your environment and preferences.
 - **Hide Account:** A feature to hide your account from search results so no one can search and message you.
-- **Two-Factor Authentication (TFA):** Enhance the security of your account with passwordless login using **SimpleWebAuthn** for Two-Factor Authentication (2FA).
+
 
 ## Technologies Used
 
@@ -48,7 +48,9 @@ Here are the technologies used to build **CHATWAVE**:
 </p>
 
 
-## Upcoming Features
+> **Demo Credentials**
 
-- **Block User:** Ability to block users, preventing them from sending messages or calling you.
-- **Two-Factor Authentication (TFA):** Future improvements for Two-Factor Authentication to make it even more secure and seamless.
+```text
+Email: logan@gmail.com
+Password: password
+```
